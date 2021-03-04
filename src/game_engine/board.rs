@@ -1,8 +1,9 @@
 use crate::game_engine::piece::Piece;
-use crate::game_engine::piece::Piece::Empty;
+use crate::game_engine::piece::Piece::*;
 use crate::game_engine::chessmove::Move;
 use crate::game_engine::chessMove::{Move, Location};
 use std::fmt;
+use crate::game_engine::piece::Color::White;
 
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
@@ -12,6 +13,17 @@ pub struct Board {
 
 
 impl Board {
+    const GAME_START: Board = Board { board: [
+        [BlackRook, BlackKnight, BlackBishop, BlackQueen, BlackKing, BlackBishop, BlackKnight, BlackRook],
+        [BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn],
+        [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
+        [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
+        [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
+        [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
+        [WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn],
+        [WhiteRook, WhiteKnight, WhiteBishop, WhiteQueen, WhiteKing, WhiteBishop, WhiteKnight, WhiteRook],
+    ]};
+
     pub fn new() -> Self {
         Self {
             board: [[Empty; 8]; 8]
