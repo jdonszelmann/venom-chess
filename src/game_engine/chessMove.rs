@@ -1,12 +1,12 @@
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
 pub struct Location {
-    pub x: u8,
-    pub y: u8,
+    pub x: i8,
+    pub y: i8,
 }
 
 impl Location {
-    pub fn new(x: u8, y: u8) -> Self {
+    pub fn new(x: i8, y: i8) -> Self {
         assert!(x >= 0 && x < 8);
         assert!(y >= 0 && y < 8);
 
@@ -16,8 +16,8 @@ impl Location {
     }
 }
 
-impl From<(u8, u8)> for Location {
-    fn from((x, y): (u8, u8)) -> Self {
+impl From<(i8, i8)> for Location {
+    fn from((x, y): (i8, i8)) -> Self {
         Self::new(x, y)
     }
 }
@@ -45,8 +45,8 @@ impl From<(Location, Location)> for Move {
     }
 }
 
-impl From<((u8, u8), (u8, u8))> for Move {
-    fn from((from, to): ((u8, u8), (u8, u8))) -> Self {
+impl From<((i8, i8), (i8, i8))> for Move {
+    fn from((from, to): ((i8, i8), (i8, i8))) -> Self {
         Self {
             from: from.into(),
             to: to.into(),

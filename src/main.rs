@@ -6,13 +6,13 @@ use game_engine::board::Board;
 use std::io::Write;
 use crate::game_engine::chessMove::Move;
 
-fn parse_input(input: &str) -> Option<(u8, u8)> {
+fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
     let first = i.next()?;
     let second = i.next()?;
 
-    let first_int: u8 = first.parse().ok()?;
-    let second_int: u8 = second.parse().ok()?;
+    let first_int: i8 = first.parse().ok()?;
+    let second_int: i8 = second.parse().ok()?;
 
     if first_int < 0 || first_int >= 8 {
         return None
