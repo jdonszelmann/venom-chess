@@ -162,7 +162,31 @@ fn bishop_moves(location: Location, board: Board) -> Vec<Move> {
     moves
 }
 
-fn knight_moves(location: Location, board: Board) -> Vec<Move> {}
+fn knight_moves(location: Location, board: Board) -> Vec<Move> {
+    let mut moves = Vec::new();
+    let our_color = board.piece_at(location).color();
+
+    for (x, y) in [(x + 2, y + 1), (x + 2, y - 1), (x - 2, y + 1), (x - 2, y - 1), (x + 1, y + 2), (x - 1, y + 2), (x + 1, y - 2), (x - 1, y - 2)] {
+        let l = (x, y).into();
+
+        if x < 0 || x >= 8 {
+            continue;
+        }
+
+        if y < 0 || y >= 8 {
+            continue;
+        }
+
+        let piece = board.piece_at(l);
+        if !piece.is_empty() && piece.color() == our_color {
+            continue;
+        }
+
+        moves.push((location, l).into());
+    }
+
+    moves
+}
 
 fn rook_moves(location: Location, board: Board) -> Vec<Move> {
     let mut moves = Vec::new();
@@ -236,16 +260,16 @@ fn king_moves(location: Location, board: Board) -> Vec<Move> {
         let l = (x, y).into();
 
         if x < 0 || x >= 8 {
-            continue
+            continue;
         }
 
         if y < 0 || y >= 8 {
-            continue
+            continue;
         }
 
         let piece = board.piece_at(l);
         if !piece.is_empty() && piece.color() == our_color {
-            continue
+            continue;
         }
 
         moves.push((location, l).into());
