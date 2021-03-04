@@ -29,15 +29,15 @@ pub enum Piece {
 
 impl Piece {
     pub fn is_empty(&self) -> bool {
-        self == Piece::Empty
+        self == &Piece::Empty
     }
 
-    pub fn moves(&self, location: Location, board: Board) -> Vec<Move> {
+    pub fn moves(&self, location: Location, board: &Board) -> Vec<Move> {
         match self {
             Self::Empty => Vec::new(),
 
-            Piece::BlackPawn => {}
-            Piece::WhitePawn => {}
+            Piece::BlackPawn => pawn_moves_black(location, board),
+            Piece::WhitePawn => pawn_moves_white(location, board),
 
             Piece::BlackBishop => bishop_moves(location, board),
             Piece::WhiteBishop => bishop_moves(location, board),
@@ -105,9 +105,97 @@ pub enum Color {
     Empty,
 }
 
-fn pawn_moves(location: Location, board: Board) -> Vec<Move> {}
+fn pawn_moves_black(location: Location, board: &Board) -> Vec<Move> {
+    let mut moves = Vec::new();
+    let our_color = board.piece_at(location).color();
 
-fn bishop_moves(location: Location, board: Board) -> Vec<Move> {
+
+    if location.y == 7 {
+        return moves
+    }
+
+    let in_front = (location.x, location.y + 1).into();
+    if board.piece_at(in_front).is_empty(){
+        moves.push((location, in_front).into());
+
+        if location.y == 1 {
+            let double_in_front = (location.x, location.y + 1).into();
+            if board.piece_at(double_in_front).is_empty(){
+                moves.push((location, double_in_front).into());
+            }
+        }
+    }
+
+    if location.x>0{
+        let other = (location.x-1, location.y + 1).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+        }
+    }
+
+    if location.x<7{
+        let other = (location.x+1, location.y + 1).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+        }
+    }
+
+    moves
+}
+
+fn pawn_moves_white(location: Location, board: &Board) -> Vec<Move> {
+    let mut moves = Vec::new();
+    let our_color = board.piece_at(location).color();
+
+
+    if location.y == 0 {
+        return moves
+    }
+
+    let in_front = (location.x, location.y - 1).into();
+    if board.piece_at(in_front).is_empty(){
+        moves.push((location, in_front).into());
+
+        if location.y == 6 {
+            let double_in_front = (location.x, location.y - 1).into();
+            if board.piece_at(double_in_front).is_empty(){
+                moves.push((location, double_in_front).into());
+            }
+        }
+    }
+
+    if location.x>0{
+        let other = (location.x-1, location.y - 1).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+        }
+    }
+
+    if location.x<7{
+        let other = (location.x+1, location.y - 1).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+        }
+    }
+
+    moves
+}
+
+
+
+fn bishop_moves(location: Location, board: &Board) -> Vec<Move> {
     let mut moves = Vec::new();
     let our_color = board.piece_at(location).color();
 
@@ -162,18 +250,21 @@ fn bishop_moves(location: Location, board: Board) -> Vec<Move> {
     moves
 }
 
-fn knight_moves(location: Location, board: Board) -> Vec<Move> {
+fn knight_moves(location: Location, board: &Board) -> Vec<Move> {
     let mut moves = Vec::new();
     let our_color = board.piece_at(location).color();
 
-    for (x, y) in [(x + 2, y + 1), (x + 2, y - 1), (x - 2, y + 1), (x - 2, y - 1), (x + 1, y + 2), (x - 1, y + 2), (x + 1, y - 2), (x - 1, y - 2)] {
-        let l = (x, y).into();
+    for (x, y) in &[(location.x + 2, location.y + 1), (location.x + 2, location.y - 1),
+        (location.x - 2, location.y + 1), (location.x - 2, location.y - 1),
+        (location.x + 1, location.y + 2), (location.x - 1, location.y + 2),
+        (location.x + 1, location.y - 2), (location.x - 1, location.y - 2)] {
+        let l = (*x, *y).into();
 
-        if x < 0 || x >= 8 {
+        if *x < 0 || *x >= 8 {
             continue;
         }
 
-        if y < 0 || y >= 8 {
+        if *y < 0 || *y >= 8 {
             continue;
         }
 
@@ -188,7 +279,7 @@ fn knight_moves(location: Location, board: Board) -> Vec<Move> {
     moves
 }
 
-fn rook_moves(location: Location, board: Board) -> Vec<Move> {
+fn rook_moves(location: Location, board: &Board) -> Vec<Move> {
     let mut moves = Vec::new();
 
     let our_color = board.piece_at(location).color();
@@ -252,18 +343,21 @@ fn rook_moves(location: Location, board: Board) -> Vec<Move> {
     moves
 }
 
-fn king_moves(location: Location, board: Board) -> Vec<Move> {
+fn king_moves(location: Location, board: &Board) -> Vec<Move> {
     let mut moves = Vec::new();
     let our_color = board.piece_at(location).color();
 
-    for (x, y) in [(x + 1, y), (x + 1, y + 1), (x, y + 1), (x - 1, y + 1), (x - 1, y), (x - 1, y - 1), (x, y - 1), (x + 1, y - 1)] {
-        let l = (x, y).into();
+    for (x, y) in &[(location.x + 1, location.y), (location.x + 1, location.y + 1),
+        (location.x, location.y + 1), (location.x - 1, location.y + 1),
+        (location.x - 1, location.y), (location.x - 1, location.y - 1),
+        (location.x, location.y - 1), (location.x + 1, location.y - 1)] {
+        let l = (*x, *y).into();
 
-        if x < 0 || x >= 8 {
+        if *x < 0 || *x >= 8 {
             continue;
         }
 
-        if y < 0 || y >= 8 {
+        if *y < 0 || *y >= 8 {
             continue;
         }
 
@@ -278,4 +372,8 @@ fn king_moves(location: Location, board: Board) -> Vec<Move> {
     moves
 }
 
-fn queen_moves(location: Location, board: Board) -> Vec<Move> {}
+fn queen_moves(location: Location, board: &Board) -> Vec<Move> {
+    let mut moves = bishop_moves(location,board);
+    moves.append(&mut rook_moves(location,board));
+    moves
+}
