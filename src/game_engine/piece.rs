@@ -105,6 +105,16 @@ pub enum Color {
     Empty,
 }
 
+impl Color {
+    pub fn other(&self) -> Self {
+        match self {
+            Black => White,
+            White => Black,
+            Empty => Empty,
+        }
+    }
+}
+
 fn pawn_moves_black(location: Location, board: &Board) -> Vec<Move> {
     let mut moves = Vec::new();
     let our_color = board.piece_at(location).color();
