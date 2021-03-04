@@ -85,16 +85,18 @@ fn repl(mut board: Board) {
 fn main() {
     let mut b = Board::DEFAULT_BOARD;
 
-    repl(b)
+    // repl(b);
 
-    // let rp = RandomPlay::new();
-    // loop {
-    //     if let Some(i) = rp.make_move(b) {
-    //         b = i;
-    //     } else {
-    //         println!("No moves left");
-    //         break
-    //     }
-    //     println!("{}", b);
-    // }
+    let rp = RandomPlay::new();
+    loop {
+        thread::sleep(Duration::from_millis(400));
+
+        if let Some(i) = rp.make_move(b) {
+            b = i;
+        } else {
+            println!("No moves left");
+            break
+        }
+        println!("{}", b);
+    }
 }

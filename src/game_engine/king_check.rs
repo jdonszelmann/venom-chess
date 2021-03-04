@@ -1,5 +1,7 @@
 use crate::game_engine::board::Board;
 use crate::game_engine::piece::Color;
+use crate::game_engine::piece::Color::*;
+use crate::game_engine::piece::Piece::*;
 
 impl Board {
     pub fn king_check(&self, color: Color) -> bool{

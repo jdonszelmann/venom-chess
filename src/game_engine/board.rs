@@ -75,6 +75,9 @@ impl Board {
     pub(crate) fn moves(&self, l: Location) -> Vec<Move> {
         self.piece_at(l)
             .moves(l, self)
+            .into_iter()
+            .filter(move |&i| !self.transition(i).king_check(self.current))
+            .collect()
     }
 
     pub fn piece_at(&self, l: Location) -> Piece {
