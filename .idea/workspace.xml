@@ -13,10 +13,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d5b67580-b596-465d-b532-a00ffede7ddf" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/ai/board.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/game_engine/board.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ai/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/ai/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ai/piece.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/game_engine/piece.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/game_engine/chessMove.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/game_engine/board.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/game_engine/board.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/game_engine/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/game_engine/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/game_engine/piece.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/game_engine/piece.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,11 +92,21 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1614884366915</updated>
-      <workItem from="1614884368268" duration="467000" />
+      <workItem from="1614884368268" duration="2654000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="773" y="259" key="#com.intellij.ide.util.MemberChooser" timestamp="1614886342466">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="773" y="259" key="#com.intellij.ide.util.MemberChooser/1.1080.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1614886342466" />
+    <state x="624" y="247" key="run.anything.popup" timestamp="1614886100140">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="624" y="247" key="run.anything.popup/1.1080.1920.1080/0.0.1920.1080@0.0.1920.1080" timestamp="1614886100140" />
   </component>
 </project>
