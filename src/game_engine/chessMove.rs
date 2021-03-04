@@ -1,4 +1,5 @@
 
+#[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
 pub struct Location {
     pub x: u8,
     pub y: u8,
@@ -21,6 +22,7 @@ impl From<(u8, u8)> for Location {
     }
 }
 
+#[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
 pub struct Move {
     from: Location,
     to: Location,

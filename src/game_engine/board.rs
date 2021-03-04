@@ -3,6 +3,7 @@ use crate::game_engine::piece::Piece::Empty;
 use crate::game_engine::chessmove::Move;
 use crate::game_engine::chessMove::{Move, Location};
 
+
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Board {
     board: [[Piece; 8]; 8]
