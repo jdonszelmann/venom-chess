@@ -39,20 +39,20 @@ impl Piece {
             Piece::BlackPawn => {}
             Piece::WhitePawn => {}
 
-            Piece::BlackBishop => {}
-            Piece::WhiteBishop => {}
+            Piece::BlackBishop => bishop_moves(location, board),
+            Piece::WhiteBishop => bishop_moves(location, board),
 
-            Piece::BlackKnight => {}
-            Piece::WhiteKnight => {}
+            Piece::BlackKnight => knight_moves(location, board),
+            Piece::WhiteKnight => knight_moves(location, board),
 
-            Piece::BlackRook => {}
-            Piece::WhiteRook => {}
+            Piece::BlackRook => rook_moves(location, board),
+            Piece::WhiteRook => rook_moves(location, board),
 
-            Piece::BlackKing => {}
-            Piece::WhiteKing => {}
+            Piece::BlackKing => king_moves(location, board),
+            Piece::WhiteKing => king_moves(location, board),
 
-            Piece::BlackQueen => {}
-            Piece::WhiteQueen => {}
+            Piece::BlackQueen => queen_moves(location, board),
+            Piece::WhiteQueen => queen_moves(location, board),
         }
     }
 
@@ -109,14 +109,74 @@ fn rook_moves(location: Location, board: Board) -> Vec<Move> {
     }
 
     for x in 0..location.x {
-        moves.push((location, (x, location.y).into()).into());
+        let other = (x, location.y).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+
+            break;
+        }
+
+        moves.push((location, other).into());
+    }
+
+    for y in (location.y + 1)..8 {
+        let other = (location.x, y).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+
+            break;
+        }
+
+        moves.push((location, other).into());
+    }
+
+    for y in 0..location.y {
+        let other = (location.x, y).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+
+            break;
+        }
+
+        moves.push((location, other).into());
     }
 
     moves
 }
 
 fn king_moves(location: Location, board: Board) -> Vec<Move> {
+    let mut moves = Vec::new();
+    let our_color = board.piece_at(location).color();
 
+    for (x, y) in [(x + 1, y), (x + 1, y + 1), (x, y + 1), (x - 1, y + 1), (x - 1, y), (x - 1, y - 1), (x, y - 1), (x + 1, y - 1)] {
+        let l = (x, y).into();
+
+        if x < 0 || x >= 8 {
+            continue
+        }
+
+        if y < 0 || y >= 8 {
+            continue
+        }
+
+        let piece = board.piece_at(l);
+        if !piece.is_empty() && piece.color() == our_color {
+            continue
+        }
+
+        moves.push((location, l).into());
+    }
+
+    moves
 }
 
 fn queen_moves(location: Location, board: Board) -> Vec<Move> {
