@@ -2,6 +2,10 @@
 mod game_engine;
 mod ai;
 
+use game_engine::board::Board;
+
 fn main() {
-    println!("Hello, world!");
+    let b = Board::DEFAULT_BOARD;
+
+    println!("{}", b);
 }

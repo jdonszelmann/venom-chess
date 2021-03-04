@@ -12,7 +12,7 @@ pub struct Board {
 
 
 impl Board {
-    const GAME_START: Board = Board { board: [
+    pub const DEFAULT_BOARD: Board = Board { board: [
         [BlackRook, BlackKnight, BlackBishop, BlackQueen, BlackKing, BlackBishop, BlackKnight, BlackRook],
         [BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn],
         [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
@@ -49,13 +49,13 @@ impl fmt::Display for Board {
         for x in 0..8 {
             for y in 0..8 {
                 if (x + y) % 2 == 0{
-                    write!(f, "\033[100m")?;
+                    write!(f, "\x1b[100m")?;
                 } else {
-                    write!(f, "\033[45m")?;
+                    write!(f, "\x1b[45m")?;
                 }
 
                 write!(f, "{}", self.piece_at((x, y).into()))?;
-                write!(f, "\033[0m")?;
+                write!(f, "\x1b[0m")?;
 
             }
             writeln!(f);
