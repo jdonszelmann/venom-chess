@@ -24,8 +24,8 @@ impl From<(u8, u8)> for Location {
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
 pub struct Move {
-    from: Location,
-    to: Location,
+    pub from: Location,
+    pub to: Location,
 }
 
 impl Move {

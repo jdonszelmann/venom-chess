@@ -34,13 +34,21 @@ impl Board {
     }
 
     pub fn transition(&self, m: Move) -> Self {
-        todo!()
+        let mut new_board = self.clone();
+        let movable = self.piece_at(m.from);
+        *new_board.piece_at_mut(m.to) = movable;
+        *new_board.piece_at_mut(m.from)= Piece::Empty;
+
+        new_board
     }
 
     pub fn piece_at(&self, l: Location) -> Piece {
         self.board[l.x as usize][l.y as usize]
     }
 
+    pub fn piece_at_mut(&mut self, l: Location) -> &mut Piece {
+        &mut self.board[l.x as usize][l.y as usize]
+    }
 
 }
 
