@@ -1,6 +1,5 @@
 use crate::game_engine::piece::Piece;
 use crate::game_engine::piece::Piece::Empty;
-use crate::game_engine::chessmove::Move;
 use crate::game_engine::chessMove::{Move, Location};
 
 
@@ -18,15 +17,15 @@ impl Board {
     }
 
     pub fn possible_moves(&self) -> Vec<Move> {
-
+        todo!()
     }
 
     pub fn transition(&self, m: Move) -> Self {
-
+        todo!()
     }
 
     pub fn piece_at(&self, l: Location) -> Piece {
-        self.board[l.x][l.y]
+        self.board[l.x as usize][l.y as usize]
     }
 
 
