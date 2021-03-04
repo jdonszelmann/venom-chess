@@ -3,6 +3,7 @@ mod game_engine;
 mod ai;
 
 use game_engine::board::Board;
+use std::io::Write;
 
 fn parse_input(input: &str) -> Option<(u8, u8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -30,6 +31,8 @@ fn repl(mut board: Board) {
     loop {
         let mut buf = String::new();
         println!("{}", board);
+        print!("? ");
+        std::io::stdout().flush();
 
         stdin.read_line(&mut buf).expect("couldn't read line from stdin");
 
@@ -40,6 +43,10 @@ fn repl(mut board: Board) {
             continue;
         };
 
+        print!("? ");
+        std::io::stdout().flush();
+
+        let mut buf = String::new();
         stdin.read_line(&mut buf).expect("couldn't read line from stdin");
 
         let (dx, dy) = if let Some(a) = parse_input(&buf) {

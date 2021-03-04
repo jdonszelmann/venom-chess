@@ -44,6 +44,7 @@ impl Board {
     pub fn transition(&self, m: Move) -> Self {
         let mut new_board = self.clone();
         let movable = self.piece_at(m.from);
+
         *new_board.piece_at_mut(m.to) = movable;
         *new_board.piece_at_mut(m.from)= Piece::Empty;
 
