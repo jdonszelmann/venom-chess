@@ -32,6 +32,30 @@ impl Piece {
         self == &Piece::Empty
     }
 
+    pub fn is_pawn(&self) -> bool {
+        self == &Piece::BlackPawn || self == &Piece::WhitePawn
+    }
+
+    pub fn is_bishop(&self) -> bool {
+        self == &Piece::BlackBishop || self == &Piece::WhiteBishop
+    }
+
+    pub fn is_knight(&self) -> bool {
+        self == &Piece::BlackKnight || self == &Piece::WhiteKing
+    }
+
+    pub fn is_rook(&self) -> bool {
+        self == &Piece::BlackRook || self == &Piece::WhiteRook
+    }
+
+    pub fn is_king(&self) -> bool {
+        self == &Piece::BlackKing || self == &Piece::WhiteKing
+    }
+
+    pub fn is_queen(&self) -> bool {
+        self == &Piece::BlackQueen || self == &Piece::WhiteQueen
+    }
+
     pub fn moves(&self, location: Location, board: &Board) -> Vec<Move> {
         match self {
             Self::Empty => Vec::new(),
