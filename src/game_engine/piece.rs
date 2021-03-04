@@ -41,7 +41,7 @@ impl Piece {
     }
 
     pub fn is_knight(&self) -> bool {
-        self == &Piece::BlackKnight || self == &Piece::WhiteKing
+        self == &Piece::BlackKnight || self == &Piece::WhiteKnight
     }
 
     pub fn is_rook(&self) -> bool {

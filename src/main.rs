@@ -89,7 +89,7 @@ fn main() {
 
     let rp = RandomPlay::new();
     loop {
-        thread::sleep(Duration::from_millis(400));
+        thread::sleep(Duration::from_millis(10));
 
         if let Some(i) = rp.make_move(b) {
             b = i;
