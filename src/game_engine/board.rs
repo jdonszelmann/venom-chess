@@ -1,6 +1,7 @@
 use crate::game_engine::piece::Piece;
 use crate::game_engine::piece::Piece::Empty;
 use crate::game_engine::chessMove::{Move, Location};
+use std::fmt;
 
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
@@ -29,4 +30,25 @@ impl Board {
     }
 
 
+}
+
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for x in 0..8 {
+            for y in 0..8 {
+                if (x + y) % 2 {
+                    write!(f, "\033[100m")?;
+                } else {
+                    write!(f, "\033[45m")?;
+                }
+
+                write!(f, "{}", self.piece_at((x, y).into()))?;
+                write!(f, "\033[0m")?;
+
+            }
+            writeln!(f);
+        }
+
+        Ok(())
+    }
 }
