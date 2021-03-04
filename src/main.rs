@@ -33,19 +33,19 @@ fn repl(mut board: Board) {
 
         stdin.read_line(&mut buf).expect("couldn't read line from stdin");
 
-        let (sx, sy) = if let Some(za) = parse_input(&buf) {
+        let (sx, sy) = if let Some(a) = parse_input(&buf) {
             a
         } else {
-            println!("couldn't parse input. Please specify a location by separating two integers by whitespace")
+            println!("couldn't parse input. Please specify a location by separating two integers by whitespace");
             continue;
         };
 
         stdin.read_line(&mut buf).expect("couldn't read line from stdin");
 
-        let (dx, dy) = if let Some(za) = parse_input(&buf) {
+        let (dx, dy) = if let Some(a) = parse_input(&buf) {
             a
         } else {
-            println!("couldn't parse input. Please specify a location by separating two integers by whitespace")
+            println!("couldn't parse input. Please specify a location by separating two integers by whitespace");
             continue;
         };
 
