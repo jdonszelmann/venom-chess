@@ -1,6 +1,7 @@
 use crate::game_engine::board::Board;
 use crate::game_engine::chessMove::{Location, Move};
 use crate::game_engine::piece::Color::{White, Empty, Black};
+use std::fmt;
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
 pub enum Piece {
@@ -66,6 +67,34 @@ impl Piece {
             Piece::WhiteQueen => White,
             _ => Black,
         }
+    }
+}
+
+impl fmt::Display for Piece {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.color() == Color::White {
+            write!(f, "\033[97m")?;
+        } else {
+            write!(f, "\033[30m")?;
+        }
+
+        match self {
+            Piece::Empty => write!(f, " "),
+            Piece::BlackPawn => write!(f, "♟︎"),
+            Piece::WhitePawn => write!(f, "♙"),
+            Piece::BlackBishop => write!(f, "♝"),
+            Piece::WhiteBishop => write!(f, "♗"),
+            Piece::BlackKnight => write!(f, "♞"),
+            Piece::WhiteKnight => write!(f, "♘"),
+            Piece::BlackRook => write!(f, "♜"),
+            Piece::WhiteRook => write!(f, "♖"),
+            Piece::BlackKing => write!(f, "♚"),
+            Piece::WhiteKing => write!(f, "♔"),
+            Piece::BlackQueen => write!(f, "♛"),
+            Piece::WhiteQueen => write!(f, "♕"),
+        }?;
+
+        Ok(())
     }
 }
 
