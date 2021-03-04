@@ -47,6 +47,8 @@ impl Board {
         *new_board.piece_at_mut(m.to) = movable;
         *new_board.piece_at_mut(m.from)= Piece::Empty;
 
+        new_board.current = self.current.other();
+
         new_board
     }
 
