@@ -129,7 +129,7 @@ fn pawn_moves_black(location: Location, board: &Board) -> Vec<Move> {
         moves.push((location, in_front).into());
 
         if location.y == 1 {
-            let double_in_front = (location.x, location.y + 1).into();
+            let double_in_front = (location.x, location.y + 2).into();
             if board.piece_at(double_in_front).is_empty(){
                 moves.push((location, double_in_front).into());
             }
@@ -173,7 +173,7 @@ fn pawn_moves_white(location: Location, board: &Board) -> Vec<Move> {
         moves.push((location, in_front).into());
 
         if location.y == 6 {
-            let double_in_front = (location.x, location.y - 1).into();
+            let double_in_front = (location.x, location.y - 2).into();
             if board.piece_at(double_in_front).is_empty(){
                 moves.push((location, double_in_front).into());
             }
