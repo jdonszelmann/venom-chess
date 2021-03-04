@@ -4,7 +4,10 @@ mod ai;
 
 use game_engine::board::Board;
 use std::io::Write;
-use crate::game_engine::chessMove::Move;
+use crate::game_engine::chess_move::Move;
+use crate::ai::random_play::RandomPlay;
+use std::time::Duration;
+use std::thread;
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -27,13 +30,14 @@ fn parse_input(input: &str) -> Option<(i8, i8)> {
 }
 
 fn repl(mut board: Board) {
-    let mut stdin = std::io::stdin();
+    let stdin = std::io::stdin();
 
     loop {
         let mut buf = String::new();
+        board.highlight(Vec::new());
         println!("{}", board);
         print!("? ");
-        std::io::stdout().flush();
+        std::io::stdout().flush().expect("couldn't flush stdout");
 
         stdin.read_line(&mut buf).expect("couldn't read line from stdin");
 
@@ -44,14 +48,18 @@ fn repl(mut board: Board) {
             continue;
         };
 
+        let moves = board.moves((sx, sy).into());
+
         if board.piece_at((sx, sy).into()).color() != board.current {
             println!("that's not your piece!");
             continue;
         }
 
+        board.highlight(moves.iter().map(|i| i.to).collect());
+        println!("{}", board);
 
         print!("? ");
-        std::io::stdout().flush();
+        std::io::stdout().flush().expect("couldn't flush stdout");
 
         let mut buf = String::new();
         stdin.read_line(&mut buf).expect("couldn't read line from stdin");
@@ -65,7 +73,6 @@ fn repl(mut board: Board) {
 
         let m: Move = ((sx, sy), (dx, dy)).into();
 
-        let moves = board.piece_at(m.from).moves(m.from, &board);
         if !moves.contains(&m) {
             println!("Invalid move!");
             continue;
@@ -76,7 +83,18 @@ fn repl(mut board: Board) {
 }
 
 fn main() {
-    let b = Board::DEFAULT_BOARD;
+    let mut b = Board::DEFAULT_BOARD;
 
     repl(b)
+
+    // let rp = RandomPlay::new();
+    // loop {
+    //     if let Some(i) = rp.make_move(b) {
+    //         b = i;
+    //     } else {
+    //         println!("No moves left");
+    //         break
+    //     }
+    //     println!("{}", b);
+    // }
 }

@@ -1,5 +1,5 @@
 use crate::game_engine::board::Board;
-use crate::game_engine::chessMove::{Location, Move};
+use crate::game_engine::chess_move::{Location, Move};
 use crate::game_engine::piece::Color::{White, Empty, Black};
 use std::fmt;
 
@@ -233,7 +233,7 @@ fn bishop_moves(location: Location, board: &Board) -> Vec<Move> {
     let mut moves = Vec::new();
     let our_color = board.piece_at(location).color();
 
-    for off in 1..(location.x.min(location.y)) {
+    for off in 1..(location.x.min(location.y) + 1) {
         let other = (location.x - off, location.y - off).into();
         let piece = board.piece_at(other);
         if !piece.is_empty() {
@@ -245,7 +245,7 @@ fn bishop_moves(location: Location, board: &Board) -> Vec<Move> {
         moves.push((location, other).into());
     }
 
-    for off in 1..((7 - location.x).min(location.y)) {
+    for off in 1..((7 - location.x).min(location.y) + 1) {
         let other = (location.x + off, location.y - off).into();
         let piece = board.piece_at(other);
         if !piece.is_empty() {
@@ -257,7 +257,7 @@ fn bishop_moves(location: Location, board: &Board) -> Vec<Move> {
         moves.push((location, other).into());
     }
 
-    for off in 1..((7 - location.x).min(7 - location.y)) {
+    for off in 1..((7 - location.x).min(7 - location.y) + 1) {
         let other = (location.x + off, location.y + off).into();
         let piece = board.piece_at(other);
         if !piece.is_empty() {
@@ -269,7 +269,7 @@ fn bishop_moves(location: Location, board: &Board) -> Vec<Move> {
         moves.push((location, other).into());
     }
 
-    for off in 1..(location.x.min(7 - location.y)) {
+    for off in 1..(location.x.min(7 - location.y) + 1) {
         let other = (location.x - off, location.y + off).into();
         let piece = board.piece_at(other);
         if !piece.is_empty() {

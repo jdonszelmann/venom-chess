@@ -1,6 +1,6 @@
 use crate::game_engine::piece::{Piece, Color};
 use crate::game_engine::piece::Piece::*;
-use crate::game_engine::chessMove::{Move, Location};
+use crate::game_engine::chess_move::{Move, Location};
 use std::fmt;
 use crate::game_engine::piece::Color::{White, Black};
 use std::io::SeekFrom::Current;
@@ -11,8 +11,9 @@ pub struct Board {
     pub board: [[Piece; 8]; 8],
 
     pub current: Color,
-}
 
+    pub highlighted: Vec<Location>
+}
 
 impl Board {
     pub const DEFAULT_BOARD: Board = Board {
@@ -28,17 +29,34 @@ impl Board {
         ],
 
         current: White,
+
+        highlighted: Vec::new(),
     };
 
     pub fn new() -> Self {
         Self {
             board: [[Empty; 8]; 8],
             current: White,
+            highlighted: Vec::new(),
         }
     }
 
-    pub fn possible_moves(&self) -> Vec<Move> {
-        todo!()
+    #[inline]
+    pub fn get_pieces<'a>(&'a self) -> impl Iterator<Item = (Piece, Location)> + 'a {
+        (0..8).map(move |i| (0..8).map(move |j| {
+            let l = (i, j).into();
+            (self.piece_at(l), l)
+        }))
+            .flatten()
+            .filter(|(i, _)| !i.is_empty())
+            .filter(move |(i, _)| i.color() == self.current)
+    }
+
+    #[inline]
+    pub fn possible_moves<'a>(&'a self) -> impl Iterator<Item = Move> + 'a {
+        self.get_pieces()
+            .map(move |(p, l)| self.moves(l))
+            .flatten()
     }
 
     pub fn transition(&self, m: Move) -> Self {
@@ -51,6 +69,12 @@ impl Board {
         new_board.current = self.current.other();
 
         new_board
+    }
+
+    #[inline]
+    pub(crate) fn moves(&self, l: Location) -> Vec<Move> {
+        self.piece_at(l)
+            .moves(l, self)
     }
 
     pub fn piece_at(&self, l: Location) -> Piece {
@@ -304,6 +328,9 @@ impl Board {
         false
     }
 
+    pub fn highlight(&mut self, locations: Vec<Location>) {
+        self.highlighted = locations;
+    }
 }
 
 impl fmt::Display for Board {
@@ -319,11 +346,15 @@ impl fmt::Display for Board {
                     write!(f, "\x1b[45m")?;
                 }
 
+                if self.highlighted.contains(&(x, y).into()) {
+                    write!(f, "\x1b[103m")?;
+                }
+
                 write!(f, "{}", self.piece_at((x, y).into()))?;
                 write!(f, "\x1b[0m")?;
 
             }
-            writeln!(f);
+            writeln!(f)?;
         }
 
         writeln!(f, "   0  1  2  3  4  5  6  7 ")?;
