@@ -48,7 +48,7 @@ fn repl(mut board: Board) {
             continue;
         };
 
-        let moves = board.piece_at((sx, sy).into()).moves((sx, sy).into(), &board);
+        let moves = board.moves((sx, sy).into());
 
         if board.piece_at((sx, sy).into()).color() != board.current {
             println!("that's not your piece!");

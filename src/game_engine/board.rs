@@ -14,7 +14,6 @@ pub struct Board {
     pub highlighted: Vec<Location>
 }
 
-
 impl Board {
     pub const DEFAULT_BOARD: Board = Board {
         board: [
@@ -41,6 +40,7 @@ impl Board {
         }
     }
 
+    #[inline]
     pub fn get_pieces<'a>(&'a self) -> impl Iterator<Item = (Piece, Location)> + 'a {
         (0..8).map(move |i| (0..8).map(move |j| {
             let l = (i, j).into();
@@ -51,9 +51,10 @@ impl Board {
             .filter(move |(i, _)| i.color() == self.current)
     }
 
+    #[inline]
     pub fn possible_moves<'a>(&'a self) -> impl Iterator<Item = Move> + 'a {
         self.get_pieces()
-            .map(move |(p, l)| p.moves(l, self))
+            .map(move |(p, l)| self.moves(l))
             .flatten()
     }
 
@@ -67,6 +68,12 @@ impl Board {
         new_board.current = self.current.other();
 
         new_board
+    }
+
+    #[inline]
+    pub(crate) fn moves(&self, l: Location) -> Vec<Move> {
+        self.piece_at(l)
+            .moves(l, self)
     }
 
     pub fn piece_at(&self, l: Location) -> Piece {
