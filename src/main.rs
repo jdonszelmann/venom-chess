@@ -44,6 +44,12 @@ fn repl(mut board: Board) {
             continue;
         };
 
+        if board.piece_at((sx, sy).into()).color() != board.current {
+            println!("that's not your piece!");
+            continue;
+        }
+
+
         print!("? ");
         std::io::stdout().flush();
 

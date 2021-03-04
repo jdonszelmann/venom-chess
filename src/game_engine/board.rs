@@ -8,9 +8,9 @@ use std::io::SeekFrom::Current;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Board {
-    board: [[Piece; 8]; 8],
+    pub board: [[Piece; 8]; 8],
 
-    current: Color,
+    pub current: Color,
 }
 
 
