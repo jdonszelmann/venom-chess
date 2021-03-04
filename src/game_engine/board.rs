@@ -36,7 +36,7 @@ impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for x in 0..8 {
             for y in 0..8 {
-                if (x + y) % 2 {
+                if (x + y) % 2 == 0{
                     write!(f, "\033[100m")?;
                 } else {
                     write!(f, "\033[45m")?;

@@ -36,8 +36,8 @@ impl Piece {
         match self {
             Self::Empty => Vec::new(),
 
-            Piece::BlackPawn => {}
-            Piece::WhitePawn => {}
+            Piece::BlackPawn => pawn_moves_black(location, board),
+            Piece::WhitePawn => pawn_moves_white(location, board),
 
             Piece::BlackBishop => bishop_moves(location, board),
             Piece::WhiteBishop => bishop_moves(location, board),
@@ -107,6 +107,8 @@ pub enum Color {
 
 fn pawn_moves_black(location: Location, board: &Board) -> Vec<Move> {
     let mut moves = Vec::new();
+    let our_color = board.piece_at(location).color();
+
 
     if location.y == 7 {
         return moves
@@ -149,6 +151,8 @@ fn pawn_moves_black(location: Location, board: &Board) -> Vec<Move> {
 
 fn pawn_moves_white(location: Location, board: &Board) -> Vec<Move> {
     let mut moves = Vec::new();
+    let our_color = board.piece_at(location).color();
+
 
     if location.y == 0 {
         return moves
