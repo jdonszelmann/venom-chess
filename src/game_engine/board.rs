@@ -1,9 +1,8 @@
 use crate::game_engine::piece::{Piece, Color};
 use crate::game_engine::piece::Piece::*;
-use crate::game_engine::chessMove::{Move, Location};
+use crate::game_engine::chess_move::{Move, Location};
 use std::fmt;
 use crate::game_engine::piece::Color::White;
-use std::io::SeekFrom::Current;
 
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
@@ -11,6 +10,8 @@ pub struct Board {
     pub board: [[Piece; 8]; 8],
 
     pub current: Color,
+
+    pub highlighted: Vec<Location>
 }
 
 
@@ -28,17 +29,32 @@ impl Board {
         ],
 
         current: White,
+
+        highlighted: Vec::new(),
     };
 
     pub fn new() -> Self {
         Self {
             board: [[Empty; 8]; 8],
             current: White,
+            highlighted: Vec::new(),
         }
     }
 
-    pub fn possible_moves(&self) -> Vec<Move> {
-        todo!()
+    pub fn get_pieces<'a>(&'a self) -> impl Iterator<Item = (Piece, Location)> + 'a {
+        (0..8).map(move |i| (0..8).map(move |j| {
+            let l = (i, j).into();
+            (self.piece_at(l), l)
+        }))
+            .flatten()
+            .filter(|(i, _)| !i.is_empty())
+            .filter(move |(i, _)| i.color() == self.current)
+    }
+
+    pub fn possible_moves<'a>(&'a self) -> impl Iterator<Item = Move> + 'a {
+        self.get_pieces()
+            .map(move |(p, l)| p.moves(l, self))
+            .flatten()
     }
 
     pub fn transition(&self, m: Move) -> Self {
@@ -61,6 +77,9 @@ impl Board {
         &mut self.board[l.y as usize][l.x as usize]
     }
 
+    pub fn highlight(&mut self, locations: Vec<Location>) {
+        self.highlighted = locations;
+    }
 }
 
 impl fmt::Display for Board {
@@ -76,11 +95,15 @@ impl fmt::Display for Board {
                     write!(f, "\x1b[45m")?;
                 }
 
+                if self.highlighted.contains(&(x, y).into()) {
+                    write!(f, "\x1b[103m")?;
+                }
+
                 write!(f, "{}", self.piece_at((x, y).into()))?;
                 write!(f, "\x1b[0m")?;
 
             }
-            writeln!(f);
+            writeln!(f)?;
         }
 
         writeln!(f, "   0  1  2  3  4  5  6  7 ")?;

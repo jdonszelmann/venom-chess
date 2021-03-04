@@ -1,5 +1,5 @@
 use crate::game_engine::board::Board;
-use crate::game_engine::chessMove::{Location, Move};
+use crate::game_engine::chess_move::{Location, Move};
 use crate::game_engine::piece::Color::{White, Empty, Black};
 use std::fmt;
 
