@@ -9,7 +9,6 @@ pub enum Piece {
     BlackPawn,
     WhitePawn,
 
-
     BlackBishop,
     WhiteBishop,
 
@@ -77,17 +76,64 @@ pub enum Color {
     Empty,
 }
 
-fn pawn_moves(location: Location, board: Board) -> Vec<Move> {
-
-}
+fn pawn_moves(location: Location, board: Board) -> Vec<Move> {}
 
 fn bishop_moves(location: Location, board: Board) -> Vec<Move> {
+    let mut moves = Vec::new();
+    let our_color = board.piece_at(location).color();
 
+    for off in 1..(location.x.min(location.y)) {
+        let other = (location.x - off, location.y - off).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+            break;
+        }
+        moves.push((location, other).into());
+    }
+
+    for off in 1..((7 - location.x).min(location.y)) {
+        let other = (location.x + off, location.y - off).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+            break;
+        }
+        moves.push((location, other).into());
+    }
+
+    for off in 1..((7 - location.x).min(7 - location.y)) {
+        let other = (location.x + off, location.y + off).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+            break;
+        }
+        moves.push((location, other).into());
+    }
+
+    for off in 1..(location.x.min(7 - location.y)) {
+        let other = (location.x - off, location.y + off).into();
+        let piece = board.piece_at(other);
+        if !piece.is_empty() {
+            if piece.color() != our_color {
+                moves.push((location, other).into());
+            }
+            break;
+        }
+        moves.push((location, other).into());
+    }
+
+    moves
 }
 
-fn knight_moves(location: Location, board: Board) -> Vec<Move> {
-
-}
+fn knight_moves(location: Location, board: Board) -> Vec<Move> {}
 
 fn rook_moves(location: Location, board: Board) -> Vec<Move> {
     let mut moves = Vec::new();
@@ -115,10 +161,6 @@ fn rook_moves(location: Location, board: Board) -> Vec<Move> {
     moves
 }
 
-fn king_moves(location: Location, board: Board) -> Vec<Move> {
+fn king_moves(location: Location, board: Board) -> Vec<Move> {}
 
-}
-
-fn queen_moves(location: Location, board: Board) -> Vec<Move> {
-
-}
+fn queen_moves(location: Location, board: Board) -> Vec<Move> {}
