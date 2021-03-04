@@ -309,7 +309,7 @@ fn rook_moves(location: Location, board: &Board) -> Vec<Move> {
         moves.push((location, other).into());
     }
 
-    for x in 0..location.x {
+    for x in (0..location.x).rev() {
         let other = (x, location.y).into();
         let piece = board.piece_at(other);
         if !piece.is_empty() {
@@ -337,7 +337,7 @@ fn rook_moves(location: Location, board: &Board) -> Vec<Move> {
         moves.push((location, other).into());
     }
 
-    for y in 0..location.y {
+    for y in (0..location.y).rev() {
         let other = (location.x, y).into();
         let piece = board.piece_at(other);
         if !piece.is_empty() {
