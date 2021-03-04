@@ -58,7 +58,7 @@ impl Board {
     }
 
     pub fn piece_at_mut(&mut self, l: Location) -> &mut Piece {
-        &mut self.board[l.x as usize][l.y as usize]
+        &mut self.board[l.y as usize][l.x as usize]
     }
 
 }
