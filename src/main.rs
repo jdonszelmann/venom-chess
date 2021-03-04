@@ -4,6 +4,7 @@ mod ai;
 
 use game_engine::board::Board;
 use std::io::Write;
+use crate::game_engine::chessMove::Move;
 
 fn parse_input(input: &str) -> Option<(u8, u8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -56,7 +57,15 @@ fn repl(mut board: Board) {
             continue;
         };
 
-        board = board.transition(((sx, sy), (dx, dy)).into())
+        let m: Move = ((sx, sy), (dx, dy)).into();
+
+        let moves = board.piece_at(m.from).moves(m.from, &board);
+        if !moves.contains(&m) {
+            println!("Invalid move!");
+            continue;
+        }
+
+        board = board.transition(m);
     }
 }
 
