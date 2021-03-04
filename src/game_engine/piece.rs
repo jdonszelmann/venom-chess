@@ -268,7 +268,6 @@ fn knight_moves(location: Location, board: &Board) -> Vec<Move> {
         (location.x - 2, location.y + 1), (location.x - 2, location.y - 1),
         (location.x + 1, location.y + 2), (location.x - 1, location.y + 2),
         (location.x + 1, location.y - 2), (location.x - 1, location.y - 2)] {
-        let l = (*x, *y).into();
 
         if *x < 0 || *x >= 8 {
             continue;
@@ -277,6 +276,8 @@ fn knight_moves(location: Location, board: &Board) -> Vec<Move> {
         if *y < 0 || *y >= 8 {
             continue;
         }
+
+        let l = (*x, *y).into();
 
         let piece = board.piece_at(l);
         if !piece.is_empty() && piece.color() == our_color {
@@ -361,8 +362,6 @@ fn king_moves(location: Location, board: &Board) -> Vec<Move> {
         (location.x, location.y + 1), (location.x - 1, location.y + 1),
         (location.x - 1, location.y), (location.x - 1, location.y - 1),
         (location.x, location.y - 1), (location.x + 1, location.y - 1)] {
-        let l = (*x, *y).into();
-
         if *x < 0 || *x >= 8 {
             continue;
         }
@@ -370,6 +369,8 @@ fn king_moves(location: Location, board: &Board) -> Vec<Move> {
         if *y < 0 || *y >= 8 {
             continue;
         }
+
+        let l = (*x, *y).into();
 
         let piece = board.piece_at(l);
         if !piece.is_empty() && piece.color() == our_color {
