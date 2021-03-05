@@ -25,8 +25,25 @@ pub enum Piece {
     WhiteQueen,
 }
 
-
 impl Piece {
+    pub fn to_number(&self) -> usize {
+        match self {
+            Piece::Empty => panic!("Empty doesn't have a number"),
+            Piece::BlackPawn => 0,
+            Piece::WhitePawn => 1,
+            Piece::BlackBishop => 2,
+            Piece::WhiteBishop => 3,
+            Piece::BlackKnight => 4,
+            Piece::WhiteKnight => 5,
+            Piece::BlackRook => 6,
+            Piece::WhiteRook => 7,
+            Piece::BlackKing => 8,
+            Piece::WhiteKing => 9,
+            Piece::BlackQueen => 10,
+            Piece::WhiteQueen => 11,
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self == &Piece::Empty
     }

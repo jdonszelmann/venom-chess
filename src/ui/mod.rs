@@ -164,7 +164,7 @@ pub fn unix_repl(mut board: BasicBoard) {
 
     let mut stdout = std::io::stdout();
     disable_raw_mode().unwrap();
-    stdout.queue(DisableMouseCapture);
+    stdout.queue(DisableMouseCapture).unwrap();
 }
 
 pub fn repl(mut board: BasicBoard) {

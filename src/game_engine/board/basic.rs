@@ -93,7 +93,7 @@ impl Board for BasicBoard {
             .collect()
     }
 
-    fn transition_with_move_func(&self, m: Move, mut func: impl FnMut(Piece, Location, Piece, Location)) -> Self {
+    fn transition_with_move_func(&self, m: Move, mut func: impl FnMut(Piece, Location, Location, Piece)) -> Self {
         let mut new_board = self.clone();
 
         let movable = self.piece_at(m.from);
@@ -151,23 +151,35 @@ impl Board for BasicBoard {
             if m == ((4,0),(2,0)).into(){
                 *new_board.piece_at_mut((3,0)) = Piece::BlackRook;
                 *new_board.piece_at_mut((0,0))= Piece::Empty;
+
+                func(Piece::BlackRook, (0,0).into(), (3,0).into(), Piece::Empty);
             }
 
             if m == ((4,0),(6,0)).into(){
                 *new_board.piece_at_mut((5,0)) = Piece::BlackRook;
                 *new_board.piece_at_mut((7,0))= Piece::Empty;
+
+                func(Piece::BlackRook, (7,0).into(), (5,0).into(), Piece::Empty);
             }
         }
 
         if movable == BlackPawn {
             if self.piece_at(m.to).is_empty(){
+                let l = (m.to.x,m.to.y-1);
+                let old = new_board.piece_at(l);
                 *new_board.piece_at_mut((m.to.x,m.to.y-1)) = Piece::Empty;
+
+                func(Piece::Empty, l.into(), l.into(), old);
             }
         }
 
         if movable == WhitePawn {
             if self.piece_at(m.to).is_empty(){
-                *new_board.piece_at_mut((m.to.x,m.to.y+1)) = Piece::Empty;
+                let l = (m.to.x,m.to.y+1);
+                let old = new_board.piece_at(l);
+                *new_board.piece_at_mut(l) = Piece::Empty;
+
+                func(Piece::Empty, l.into(), l.into(), old);
             }
         }
 
@@ -175,18 +187,22 @@ impl Board for BasicBoard {
             if m == ((4,7),(2,7)).into(){
                 *new_board.piece_at_mut((3,7)) = Piece::WhiteRook;
                 *new_board.piece_at_mut((0,7))= Piece::Empty;
+
+                func(Piece::WhiteRook, (0,7).into(), (3,7).into(), Piece::Empty);
             }
 
             if m == ((4,7),(6,7)).into(){
                 *new_board.piece_at_mut((5,7)) = Piece::WhiteRook;
                 *new_board.piece_at_mut((7,7))= Piece::Empty;
+
+                func(Piece::WhiteRook, (7,7).into(), (5,7).into(), Piece::Empty);
             }
         }
 
         *new_board.piece_at_mut(m.to) = movable;
         *new_board.piece_at_mut(m.from)= Piece::Empty;
 
-        func(movable, m.from, replaces, m.to);
+        func(movable, m.from, m.to, replaces);
 
         new_board.current = self.current.other();
 

@@ -15,7 +15,7 @@ pub trait Board: Sized + Clone {
     fn transition(&self, m: Move) -> Self {
         self.transition_with_move_func(m, |_, _, _, _|{})
     }
-    fn transition_with_move_func(&self, m: Move, func: impl FnMut(Piece, Location, Piece, Location)) -> Self;
+    fn transition_with_move_func(&self, m: Move, func: impl FnMut(Piece, Location, Location, Piece)) -> Self;
 
     fn all_pieces(&self) -> Vec<(Piece, Location)>;
 
