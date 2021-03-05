@@ -93,9 +93,11 @@ impl Board for BasicBoard {
             .collect()
     }
 
-    fn transition(&self, m: Move) -> Self {
+    fn transition_with_move_func(&self, m: Move, mut func: impl FnMut(Piece, Location, Piece, Location)) -> Self {
         let mut new_board = self.clone();
+
         let movable = self.piece_at(m.from);
+        let replaces = self.piece_at(m.to);
 
         if movable == BlackKing{
             new_board.castling_rights[0] = false;
@@ -191,10 +193,13 @@ impl Board for BasicBoard {
 
         *new_board.piece_at_mut(m.from)= Piece::Empty;
 
+        func(movable, m.from, replaces, m.to);
+
         new_board.current = self.current.other();
 
         new_board
     }
+
 
     fn all_pieces(&self) -> Vec<(Piece, Location)> {
         (0..8).map(move |i| (0..8).map(move |j| {
@@ -209,6 +214,10 @@ impl Board for BasicBoard {
 
     fn is_terminal(&self) -> Option<Color> {
         unimplemented!()
+    }
+
+    fn current_player(&self) -> Color {
+        self.current
     }
 
     fn piece_at(&self, l: impl Into<Location>) -> Piece {
