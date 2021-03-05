@@ -4,6 +4,9 @@ use std::io::{Write, Stdout};
 use crate::game_engine::chess_move::Move;
 use termion::input::{MouseTerminal, TermRead};
 use termion::event::{Event, MouseEvent, Key};
+use termion::{cursor, terminal_size};
+use std::thread;
+use std::time::Duration;
 
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
@@ -28,22 +31,31 @@ fn parse_input(input: &str) -> Option<(i8, i8)> {
 
 
 fn mouse_pos_to_coord(x: u16, y: u16) -> (i8, i8) {
-    (((x - 3) / 3) as i8, (y - 13) as i8)
+    ((x - 3) as i8 / 3, y as i8 - 2)
 }
 
 enum ErrorKind {
     Exit,
-    UndoMove
+    UndoMove,
+    Redraw,
 }
 
 
 fn get_mouse_input(stdout: &mut MouseTerminal<RawTerminal<Stdout>>) -> Result<(i8, i8), ErrorKind> {
+    let size = terminal_size().unwrap();
+
     for c in std::io::stdin().events() {
+        let new_size = terminal_size().unwrap();
+        if new_size != size {
+            return Err(ErrorKind::Redraw)
+        }
+
+
         let evt = c.unwrap();
         match evt {
-            Event::Key( Key::Ctrl('c')) => return Err(ErrorKind::Exit),
-            Event::Key( Key::Ctrl('d')) => return Err(ErrorKind::Exit),
-            Event::Key( Key::Esc) => return Err(ErrorKind::UndoMove),
+            Event::Key(Key::Ctrl('c')) => return Err(ErrorKind::Exit),
+            Event::Key(Key::Ctrl('d')) => return Err(ErrorKind::Exit),
+            Event::Key(Key::Esc) => return Err(ErrorKind::UndoMove),
             Event::Mouse(me) => {
                 match me {
                     MouseEvent::Release(a, b) |
@@ -54,8 +66,6 @@ fn get_mouse_input(stdout: &mut MouseTerminal<RawTerminal<Stdout>>) -> Result<(i
                             continue
                         }
 
-                        // write!(stdout, "{}", cursor::Goto(a, b)).unwrap();
-                        // write!(stdout, "{},{}", x, y).unwrap();
                         return Ok((x, y))
                     }
                     _ => (),
@@ -81,6 +91,7 @@ pub fn unix_repl(mut board: Board) {
 
     'outer: loop {
         print!("{}", termion::clear::All);
+        print!("{}", cursor::Goto(1, 1));
 
         stdout.suspend_raw_mode().unwrap();
         println!();
@@ -95,16 +106,17 @@ pub fn unix_repl(mut board: Board) {
                 Ok(a) => break a,
                 Err(ErrorKind::Exit) => return,
                 Err(ErrorKind::UndoMove) => continue,
+                Err(ErrorKind::Redraw) => continue 'outer,
             };
         };
 
         let moves = board.moves((sx, sy));
 
         print!("{}", termion::clear::All);
+        print!("{}", cursor::Goto(1, 1));
 
         stdout.suspend_raw_mode().unwrap();
         println!();
-        println!("{} {}", sx, sy);
 
         if board.piece_at((sx, sy)).color() != board.current {
             println!("that's not your piece!");
@@ -121,6 +133,7 @@ pub fn unix_repl(mut board: Board) {
                 Ok(a) => break a,
                 Err(ErrorKind::Exit) => return,
                 Err(ErrorKind::UndoMove) => continue 'outer,
+                Err(ErrorKind::Redraw) => continue 'outer,
             };
         };
 
