@@ -205,7 +205,7 @@ impl Board for BasicBoard {
             }
         }
 
-        new_board.material_score += self.piece_at(m.to);
+        new_board.material_score += self.piece_at(m.to).material_worth();
 
         match m.extra {
             Extra::KnightPromotion => *new_board.piece_at_mut(m.to) = knight_of_color(movable.color()),
