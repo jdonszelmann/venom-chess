@@ -7,7 +7,7 @@ use crate::game_engine::piece::Piece;
 pub mod basic;
 pub mod zobrist;
 
-pub trait Board: Sized {
+pub trait Board: Sized + Clone {
     fn moves(&self, location: impl Into<Location>) -> Vec<Move>;
     fn all_moves(&self) -> Vec<Move>;
 
@@ -23,6 +23,8 @@ pub trait Board: Sized {
 
     fn current_player(&self) -> Color;
 
+    fn get_castling_rights(&self) -> [bool; 4];
+    fn get_en_passant(&self) -> i8;
     fn piece_at(&self, l: impl Into<Location>) -> Piece;
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece;
 }

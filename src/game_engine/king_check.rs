@@ -29,9 +29,9 @@ pub fn king_location(board: &impl Board, color: Color) -> Option<Location> {
 }
 
 
-pub fn king_check(board: impl Board, color: Color) -> bool{
+pub fn king_check(board: &impl Board, color: Color) -> bool{
 
-    let king_loc = king_location(&board, color).unwrap();
+    let king_loc = king_location(board, color).unwrap();
 
     for off in 1..(king_loc.x.min(king_loc.y)) {
         let other = (king_loc.x - off, king_loc.y - off);
