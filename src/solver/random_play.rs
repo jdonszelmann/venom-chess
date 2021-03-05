@@ -1,7 +1,7 @@
 use crate::game_engine::board::Board;
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
-use crate::ai::Solver;
+use crate::solver::Solver;
 
 pub struct RandomPlay {
 }

@@ -103,6 +103,9 @@ impl Board for BasicBoard {
         let movable = self.piece_at(m.from);
         let replaces = self.piece_at(m.to);
 
+        new_board.material_score += self.piece_at(m.to).material_worth();
+
+
         if movable == BlackKing{
             new_board.castling_rights[0] = false;
             new_board.castling_rights[1] = false;
@@ -205,8 +208,6 @@ impl Board for BasicBoard {
             }
         }
 
-        new_board.material_score += self.piece_at(m.to).material_worth();
-
         let set_piece = match m.extra {
             Extra::KnightPromotion =>  knight_of_color(movable.color()),
             Extra::BishopPromotion => bishop_of_color(movable.color()),
@@ -220,7 +221,6 @@ impl Board for BasicBoard {
         }
 
         *new_board.piece_at_mut(m.to) = set_piece;
-
         *new_board.piece_at_mut(m.from)= Piece::Empty;
 
         func(movable, m.from, m.to, replaces);

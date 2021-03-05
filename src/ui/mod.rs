@@ -10,7 +10,7 @@ use crate::game_engine::piece::{Piece, queen_of_color, rook_of_color, bishop_of_
 use crate::game_engine::color::Color;
 use crate::game_engine::chess_move::Extra;
 use std::panic::catch_unwind;
-use crate::ai::Solver;
+use crate::solver::Solver;
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -98,11 +98,14 @@ fn unix_repl_impl<S: Solver>(mut board: BasicBoard, solver: Option<S>) -> crosst
 
         board.highlight(Vec::new());
         println!("{}", board);
+        println!("{}", board.material_score);
         stdout.flush().expect("couldn't flush stdout");
         enable_raw_mode()?;
 
         if board.current_player() == Color::Black {
             if let Some(ref s) = solver {
+                println!("Solver is making it's move");
+
                 board = match s.make_move(board) {
                     Some(i) => i,
                     None => {
@@ -245,6 +248,8 @@ pub fn repl<S: Solver>(mut board: BasicBoard, solver: Option<S>) {
 
         if board.current_player() == Color::Black {
             if let Some(ref s) = solver {
+                println!("Solver is making it's move");
+
                 board = match s.make_move(board) {
                     Some(i) => i,
                     None => {

@@ -216,7 +216,7 @@ mod tests {
     use crate::game_engine::board::{BasicBoard, Board};
     use crate::game_engine::board::zobrist::{ZobristBoard, ZobristKeys};
     use super::ZOBRIST_KEYS;
-    use crate::ai::random_play::RandomPlay;
+    use crate::solver::random_play::RandomPlay;
 
     #[test]
     fn test_switch_color_twice() {
