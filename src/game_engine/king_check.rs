@@ -9,7 +9,7 @@ impl Board {
         let king_loc = self.king_location(color).unwrap();
 
         for off in 1..(king_loc.x.min(king_loc.y)) {
-            let other = (king_loc.x - off, king_loc.y - off).into();
+            let other = (king_loc.x - off, king_loc.y - off);
             let piece = self.piece_at(other);
             if !piece.is_empty() {
                 if piece.color() != color {
@@ -22,7 +22,7 @@ impl Board {
         }
 
         for off in 1..((7 - king_loc.x).min(king_loc.y)) {
-            let other = (king_loc.x + off, king_loc.y - off).into();
+            let other = (king_loc.x + off, king_loc.y - off);
             let piece = self.piece_at(other);
             if !piece.is_empty() {
                 if piece.color() != color {
@@ -35,7 +35,7 @@ impl Board {
         }
 
         for off in 1..((7 - king_loc.x).min(7 - king_loc.y)) {
-            let other = (king_loc.x + off, king_loc.y + off).into();
+            let other = (king_loc.x + off, king_loc.y + off);
             let piece = self.piece_at(other);
             if !piece.is_empty() {
                 if piece.color() != color {
@@ -48,7 +48,7 @@ impl Board {
         }
 
         for off in 1..(king_loc.x.min(7 - king_loc.y)) {
-            let other = (king_loc.x - off, king_loc.y + off).into();
+            let other = (king_loc.x - off, king_loc.y + off);
             let piece = self.piece_at(other);
             if !piece.is_empty() {
                 if piece.color() != color {
@@ -63,7 +63,7 @@ impl Board {
         // ==================
 
         for x in (king_loc.x + 1)..8 {
-            let other = (x, king_loc.y).into();
+            let other = (x, king_loc.y);
             let piece = self.piece_at(other);
             if !piece.is_empty() {
                 if piece.color() != color {
@@ -76,7 +76,7 @@ impl Board {
         }
 
         for x in (0..king_loc.x).rev() {
-            let other = (x, king_loc.y).into();
+            let other = (x, king_loc.y);
             let piece = self.piece_at(other);
             if !piece.is_empty() {
                 if piece.color() != color {
@@ -89,7 +89,7 @@ impl Board {
         }
 
         for y in (king_loc.y + 1)..8 {
-            let other = (king_loc.x, y).into();
+            let other = (king_loc.x, y);
             let piece = self.piece_at(other);
             if !piece.is_empty() {
                 if piece.color() != color {
@@ -102,7 +102,7 @@ impl Board {
         }
 
         for y in (0..king_loc.y).rev() {
-            let other = (king_loc.x, y).into();
+            let other = (king_loc.x, y);
             let piece = self.piece_at(other);
             if !piece.is_empty() {
                 if piece.color() != color {
@@ -128,9 +128,7 @@ impl Board {
                 continue;
             }
 
-            let l = (*x, *y).into();
-
-            let piece = self.piece_at(l);
+            let piece = self.piece_at((*x, *y));
             if !piece.is_empty() {
                 if piece.color() != color {
                     if piece.is_knight() {
@@ -153,9 +151,7 @@ impl Board {
                 continue;
             }
 
-            let l = (*x, *y).into();
-
-            let piece = self.piece_at(l);
+            let piece = self.piece_at((*x, *y));
             if !piece.is_empty() {
                 if piece.color() != color {
                     if piece.is_king() {
@@ -170,7 +166,7 @@ impl Board {
         if color == Black{
             if king_loc.y<7 {
                 if king_loc.x > 0 {
-                    let other = (king_loc.x-1, king_loc.y + 1).into();
+                    let other = (king_loc.x-1, king_loc.y + 1);
                     let piece = self.piece_at(other);
                     if !piece.is_empty() {
                         if piece.color() != color {
@@ -181,7 +177,7 @@ impl Board {
                     }
                 }
                 if king_loc.x<7{
-                    let other = (king_loc.x+1, king_loc.y + 1).into();
+                    let other = (king_loc.x+1, king_loc.y + 1);
                     let piece = self.piece_at(other);
                     if !piece.is_empty() {
                         if piece.color() != color {
@@ -195,7 +191,7 @@ impl Board {
         } else {
             if king_loc.y>0 {
                 if king_loc.x > 0 {
-                    let other = (king_loc.x-1, king_loc.y - 1).into();
+                    let other = (king_loc.x-1, king_loc.y - 1);
                     let piece = self.piece_at(other);
                     if !piece.is_empty() {
                         if piece.color() != color {
@@ -206,7 +202,7 @@ impl Board {
                     }
                 }
                 if king_loc.x<7{
-                    let other = (king_loc.x+1, king_loc.y - 1).into();
+                    let other = (king_loc.x+1, king_loc.y - 1);
                     let piece = self.piece_at(other);
                     if !piece.is_empty() {
                         if piece.color() != color {

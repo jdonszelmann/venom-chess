@@ -72,7 +72,7 @@ impl Board {
     }
 
     #[inline]
-    pub(crate) fn moves(&self, l: Location) -> Vec<Move> {
+    pub(crate) fn moves(&self, l: impl Into<Location> + Copy) -> Vec<Move> {
         self.piece_at(l)
             .moves(l, self)
             .into_iter()
@@ -80,7 +80,8 @@ impl Board {
             .collect()
     }
 
-    pub fn piece_at(&self, l: Location) -> Piece {
+    pub fn piece_at(&self, l: impl Into<Location>) -> Piece {
+        let l = l.into();
         self.board[l.y as usize][l.x as usize]
     }
 
@@ -92,7 +93,7 @@ impl Board {
         if color == Color::White {
             for y in 0..8 {
                 for x in 0..8 {
-                    let other = self.piece_at((x, y).into());
+                    let other = self.piece_at((x, y));
                     if other == Piece::WhiteKing{
                         return Some((x,y).into());
                     }
@@ -101,7 +102,7 @@ impl Board {
         } else {
             for y in 0..8 {
                 for x in 0..8 {
-                    let other = self.piece_at((x, y).into());
+                    let other = self.piece_at((x, y));
                     if other == Piece::BlackKing{
                         return Some((x,y).into());
                     }
@@ -135,7 +136,7 @@ impl fmt::Display for Board {
                     write!(f, "\x1b[103m")?;
                 }
 
-                write!(f, "{}", self.piece_at((x, y).into()))?;
+                write!(f, "{}", self.piece_at((x, y)))?;
                 write!(f, "\x1b[0m")?;
 
             }

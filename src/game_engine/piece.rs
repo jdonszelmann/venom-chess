@@ -56,27 +56,27 @@ impl Piece {
         self == &Piece::BlackQueen || self == &Piece::WhiteQueen
     }
 
-    pub fn moves(&self, location: Location, board: &Board) -> Vec<Move> {
+    pub fn moves(&self, location: impl Into<Location>, board: &Board) -> Vec<Move> {
         match self {
             Self::Empty => Vec::new(),
 
-            Piece::BlackPawn => pawn_moves_black(location, board),
-            Piece::WhitePawn => pawn_moves_white(location, board),
+            Piece::BlackPawn => pawn_moves_black(location.into(), board),
+            Piece::WhitePawn => pawn_moves_white(location.into(), board),
 
-            Piece::BlackBishop => bishop_moves(location, board),
-            Piece::WhiteBishop => bishop_moves(location, board),
+            Piece::BlackBishop => bishop_moves(location.into(), board),
+            Piece::WhiteBishop => bishop_moves(location.into(), board),
 
-            Piece::BlackKnight => knight_moves(location, board),
-            Piece::WhiteKnight => knight_moves(location, board),
+            Piece::BlackKnight => knight_moves(location.into(), board),
+            Piece::WhiteKnight => knight_moves(location.into(), board),
 
-            Piece::BlackRook => rook_moves(location, board),
-            Piece::WhiteRook => rook_moves(location, board),
+            Piece::BlackRook => rook_moves(location.into(), board),
+            Piece::WhiteRook => rook_moves(location.into(), board),
 
-            Piece::BlackKing => king_moves(location, board),
-            Piece::WhiteKing => king_moves(location, board),
+            Piece::BlackKing => king_moves(location.into(), board),
+            Piece::WhiteKing => king_moves(location.into(), board),
 
-            Piece::BlackQueen => queen_moves(location, board),
-            Piece::WhiteQueen => queen_moves(location, board),
+            Piece::BlackQueen => queen_moves(location.into(), board),
+            Piece::WhiteQueen => queen_moves(location.into(), board),
         }
     }
 
