@@ -16,6 +16,7 @@ pub struct BasicBoard {
     pub highlighted: Vec<Location>,
     pub castling_rights : [bool; 4],
     pub en_passant : i8,
+    pub material_score : i8,
 }
 
 impl BasicBoard {
@@ -38,6 +39,8 @@ impl BasicBoard {
         castling_rights : [true;4],
 
         en_passant: 8,
+
+        material_score: 0,
     };
 
     pub fn new() -> Self {
@@ -47,6 +50,7 @@ impl BasicBoard {
             highlighted: Vec::new(),
             castling_rights : [true;4],
             en_passant: 8,
+            material_score: 0,
         }
     }
 
@@ -170,6 +174,7 @@ impl Board for BasicBoard {
                 *new_board.piece_at_mut((m.to.x,m.to.y-1)) = Piece::Empty;
 
                 func(Piece::Empty, l.into(), l.into(), old);
+                new_board.material_score += -1;
             }
         }
 
@@ -180,6 +185,7 @@ impl Board for BasicBoard {
                 *new_board.piece_at_mut(l) = Piece::Empty;
 
                 func(Piece::Empty, l.into(), l.into(), old);
+                new_board.material_score += 1;
             }
         }
 
@@ -198,6 +204,8 @@ impl Board for BasicBoard {
                 func(Piece::WhiteRook, (7,7).into(), (5,7).into(), Piece::Empty);
             }
         }
+
+        new_board.material_score += self.piece_at(m.to);
 
         match m.extra {
             8 => *new_board.piece_at_mut(m.to) = knight_of_color(movable.color()),
