@@ -44,6 +44,17 @@ pub fn pawn_moves_black(location: Location, board: &impl Board) -> Vec<Move> {
         }
     }
 
+    if board.get_en_passant()!=8{
+        if location.y == 4 {
+            if location.x+1 == board.get_en_passant(){
+                moves.push((location,(location.x+1,location.y+1).into()).into());
+            }
+            if location.x-1 == board.get_en_passant(){
+                moves.push((location,(location.x-1,location.y+1).into()).into());
+            }
+        }
+    }
+
     moves
 }
 
@@ -84,6 +95,17 @@ pub fn pawn_moves_white(location: Location, board: &impl Board) -> Vec<Move> {
         if !piece.is_empty() {
             if piece.color() != our_color {
                 moves.push((location, other).into());
+            }
+        }
+    }
+
+    if board.get_en_passant()!=8{
+        if location.y == 3 {
+            if location.x+1 == board.get_en_passant(){
+                moves.push((location,(location.x+1,location.y-1).into()).into());
+            }
+            if location.x-1 == board.get_en_passant(){
+                moves.push((location,(location.x-1,location.y-1).into()).into());
             }
         }
     }

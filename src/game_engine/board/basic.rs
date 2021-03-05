@@ -15,6 +15,7 @@ pub struct BasicBoard {
     pub current: Color,
     pub highlighted: Vec<Location>,
     pub castling_rights : [bool; 4],
+    pub en_passant : i8,
 }
 
 impl BasicBoard {
@@ -35,6 +36,8 @@ impl BasicBoard {
         highlighted: Vec::new(),
 
         castling_rights : [true;4],
+
+        en_passant: 8,
     };
 
     pub fn new() -> Self {
@@ -43,6 +46,7 @@ impl BasicBoard {
             current: White,
             highlighted: Vec::new(),
             castling_rights : [true;4],
+            en_passant: 8,
         }
     }
 
@@ -128,6 +132,19 @@ impl Board for BasicBoard {
             new_board.castling_rights[3] = false;
         }
 
+        new_board.en_passant = 8;
+        if movable == Piece::WhitePawn {
+            if m.to.y + 2 == m.from.y {
+                new_board.en_passant = m.from.x;
+            }
+        }
+
+        if movable == Piece::BlackPawn {
+            if m.to.y - 2 == m.from.y {
+                new_board.en_passant = m.from.x;
+            }
+        }
+
         if movable == BlackKing {
             if m == ((4,0),(2,0)).into(){
                 *new_board.piece_at_mut((3,0)) = Piece::BlackRook;
@@ -137,6 +154,18 @@ impl Board for BasicBoard {
             if m == ((4,0),(6,0)).into(){
                 *new_board.piece_at_mut((5,0)) = Piece::BlackRook;
                 *new_board.piece_at_mut((7,0))= Piece::Empty;
+            }
+        }
+
+        if movable == BlackPawn {
+            if self.piece_at(m.to).is_empty(){
+                *new_board.piece_at_mut((m.to.x,m.to.y-1)) = Piece::Empty;
+            }
+        }
+
+        if movable == WhitePawn {
+            if self.piece_at(m.to).is_empty(){
+                *new_board.piece_at_mut((m.to.x,m.to.y+1)) = Piece::Empty;
             }
         }
 
@@ -187,6 +216,10 @@ impl Board for BasicBoard {
 
     fn get_castling_rights(&self) -> [bool; 4] {
         self.castling_rights
+    }
+
+    fn get_en_passant(&self) -> i8 {
+        self.en_passant
     }
 }
 
