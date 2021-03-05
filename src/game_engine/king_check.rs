@@ -166,7 +166,6 @@ pub fn king_check(board: &impl Board, color: Color) -> bool{
                     return true
                 }
             }
-            break;
         }
     }
 
@@ -189,7 +188,6 @@ pub fn king_check(board: &impl Board, color: Color) -> bool{
                     return true
                 }
             }
-            break;
         }
 
     }
