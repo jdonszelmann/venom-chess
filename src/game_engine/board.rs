@@ -2,8 +2,7 @@ use crate::game_engine::piece::{Piece, Color};
 use crate::game_engine::piece::Piece::*;
 use crate::game_engine::chess_move::{Move, Location};
 use std::fmt;
-use crate::game_engine::piece::Color::{White, Black};
-use std::io::SeekFrom::Current;
+use crate::game_engine::piece::Color::*;
 
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
@@ -55,7 +54,7 @@ impl Board {
     #[inline]
     pub fn possible_moves<'a>(&'a self) -> impl Iterator<Item = Move> + 'a {
         self.get_pieces()
-            .map(move |(p, l)| self.moves(l))
+            .map(move |(_, l)| self.moves(l))
             .flatten()
     }
 
@@ -72,7 +71,7 @@ impl Board {
     }
 
     #[inline]
-    pub(crate) fn moves(&self, l: Location) -> Vec<Move> {
+    pub(crate) fn moves(&self, l: impl Into<Location> + Copy) -> Vec<Move> {
         self.piece_at(l)
             .moves(l, self)
             .into_iter()
@@ -80,7 +79,8 @@ impl Board {
             .collect()
     }
 
-    pub fn piece_at(&self, l: Location) -> Piece {
+    pub fn piece_at(&self, l: impl Into<Location>) -> Piece {
+        let l = l.into();
         self.board[l.y as usize][l.x as usize]
     }
 
@@ -92,7 +92,7 @@ impl Board {
         if color == Color::White {
             for y in 0..8 {
                 for x in 0..8 {
-                    let other = self.piece_at((x, y).into());
+                    let other = self.piece_at((x, y));
                     if other == Piece::WhiteKing{
                         return Some((x,y).into());
                     }
@@ -101,7 +101,7 @@ impl Board {
         } else {
             for y in 0..8 {
                 for x in 0..8 {
-                    let other = self.piece_at((x, y).into());
+                    let other = self.piece_at((x, y));
                     if other == Piece::BlackKing{
                         return Some((x,y).into());
                     }
@@ -135,7 +135,7 @@ impl fmt::Display for Board {
                     write!(f, "\x1b[103m")?;
                 }
 
-                write!(f, "{}", self.piece_at((x, y).into()))?;
+                write!(f, "{}", self.piece_at((x, y)))?;
                 write!(f, "\x1b[0m")?;
 
             }
