@@ -154,7 +154,7 @@ fn unix_repl_impl(mut board: BasicBoard) -> crossterm::Result<()> {
                 }
             }
 
-            board = board.transition(m);
+            board = board.transition(i);
         } else {
             println!("Invalid move!");
             continue;
@@ -262,11 +262,49 @@ pub fn repl(mut board: BasicBoard) {
 
         let m: Move = ((sx, sy), (dx, dy)).into();
 
-        if !moves.contains(&m) {
+        if let Some(mut i) = moves.iter().find(|&cm| cm.from == m.from && cm.to == m.to).copied() {
+            if i.extra.is_promotion() {
+                if let Some(e) = do_promotion_input_fallback(board.current).unwrap() {
+
+                    // FIXME: Capturing promotions
+                    i.extra = e
+                } else {
+                    continue
+                }
+            }
+
+            board = board.transition(i);
+        } else {
             println!("Invalid move!");
             continue;
         }
-
-        board = board.transition(m);
     }
+}
+
+fn do_promotion_input_fallback(color: Color) -> crossterm::Result<Option<Extra>> {
+    println!("1: Queen");
+    println!("2: Rook");
+    println!("3: Bishop");
+    println!("4: Knight");
+
+    let mut stdin = std::io::stdin();
+
+    let mut buf = String::new();
+    stdin.read_line(&mut buf).expect("couldn't read line from stdin");
+
+    let value: u64 = match buf.trim().parse() {
+        Ok(i) => i,
+        Err(_) => {
+            println!("Couldn't parse input as number");
+            return do_promotion_input_fallback(color);
+        },
+    };
+
+    Ok(Some(match value {
+        1 => Extra::QueenPromotion,
+        2 => Extra::RookPromotion,
+        3 => Extra::BishopPromotion,
+        4 => Extra::KnightPromotion,
+        _ => return do_promotion_input_fallback(color)
+    }))
 }
