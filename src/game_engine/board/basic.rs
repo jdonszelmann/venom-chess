@@ -12,10 +12,9 @@ use crate::game_engine::piece_moves::{pawn_moves_black, pawn_moves_white, bishop
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub struct BasicBoard {
     pub board: [[Piece; 8]; 8],
-
     pub current: Color,
-
-    pub highlighted: Vec<Location>
+    pub highlighted: Vec<Location>,
+    pub castling_rights : [bool; 4],
 }
 
 impl BasicBoard {
@@ -34,6 +33,8 @@ impl BasicBoard {
         current: White,
 
         highlighted: Vec::new(),
+
+        castling_rights : [true;4],
     };
 
     pub fn new() -> Self {
@@ -41,6 +42,7 @@ impl BasicBoard {
             board: [[Empty; 8]; 8],
             current: White,
             highlighted: Vec::new(),
+            castling_rights : [true;4],
         }
     }
 
@@ -75,7 +77,7 @@ impl Board for BasicBoard {
             Piece::BlackQueen => queen_moves(location, self),
             Piece::WhiteQueen => queen_moves(location, self),
         }.into_iter()
-            .filter(move |&i| !king_check(self.transition(i), self.current))
+            .filter(move |&i| !king_check(&self.transition(i), self.current))
             .collect()
     }
 
@@ -90,6 +92,65 @@ impl Board for BasicBoard {
     fn transition(&self, m: Move) -> Self {
         let mut new_board = self.clone();
         let movable = self.piece_at(m.from);
+
+        if movable == BlackKing{
+            new_board.castling_rights[0] = false;
+            new_board.castling_rights[1] = false;
+        }
+        if movable == WhiteKing{
+            new_board.castling_rights[2] = false;
+            new_board.castling_rights[3] = false;
+        }
+
+        if m.from == (0,0).into(){
+            new_board.castling_rights[0] = false;
+        }
+        if m.from == (7,0).into(){
+            new_board.castling_rights[1] = false;
+        }
+        if m.from == (0,7).into(){
+            new_board.castling_rights[2] = false;
+        }
+        if m.from == (7,7).into(){
+            new_board.castling_rights[3] = false;
+        }
+
+        if m.to == (0,0).into(){
+            new_board.castling_rights[0] = false;
+        }
+        if m.to == (7,0).into(){
+            new_board.castling_rights[1] = false;
+        }
+        if m.to == (0,7).into(){
+            new_board.castling_rights[2] = false;
+        }
+        if m.to == (7,7).into(){
+            new_board.castling_rights[3] = false;
+        }
+
+        if movable == BlackKing {
+            if m == ((4,0),(2,0)).into(){
+                *new_board.piece_at_mut((3,0)) = Piece::BlackRook;
+                *new_board.piece_at_mut((0,0))= Piece::Empty;
+            }
+
+            if m == ((4,0),(6,0)).into(){
+                *new_board.piece_at_mut((5,0)) = Piece::BlackRook;
+                *new_board.piece_at_mut((7,0))= Piece::Empty;
+            }
+        }
+
+        if movable == WhiteKing {
+            if m == ((4,7),(2,7)).into(){
+                *new_board.piece_at_mut((3,7)) = Piece::WhiteRook;
+                *new_board.piece_at_mut((0,7))= Piece::Empty;
+            }
+
+            if m == ((4,7),(6,7)).into(){
+                *new_board.piece_at_mut((5,7)) = Piece::WhiteRook;
+                *new_board.piece_at_mut((7,7))= Piece::Empty;
+            }
+        }
 
         *new_board.piece_at_mut(m.to) = movable;
         *new_board.piece_at_mut(m.from)= Piece::Empty;
@@ -122,6 +183,10 @@ impl Board for BasicBoard {
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece {
         let l = l.into();
         &mut self.board[l.y as usize][l.x as usize]
+    }
+
+    fn get_castling_rights(&self) -> [bool; 4] {
+        self.castling_rights
     }
 }
 

@@ -6,7 +6,7 @@ use crate::game_engine::piece::Piece;
 
 pub mod basic;
 
-pub trait Board: Sized {
+pub trait Board: Sized + Clone {
     fn moves(&self, location: impl Into<Location>) -> Vec<Move>;
     fn all_moves(&self) -> Vec<Move>;
     fn transition(&self, m: Move) -> Self;
@@ -15,7 +15,7 @@ pub trait Board: Sized {
 
     fn is_terminal(&self) -> Option<Color>;
 
-
+    fn get_castling_rights(&self) -> [bool; 4];
     fn piece_at(&self, l: impl Into<Location>) -> Piece;
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece;
 }
