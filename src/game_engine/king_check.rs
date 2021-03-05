@@ -31,9 +31,15 @@ pub fn king_location(board: &impl Board, color: Color) -> Option<Location> {
 
 pub fn king_check(board: &impl Board, color: Color) -> bool{
 
-    let king_loc = king_location(board, color).unwrap();
+    let king_loc = match king_location(board, color) {
+        Some(i) => i,
+        None => {
+            println!("{}", board);
+            panic!("AAAAAAA");
+        }
+    };
 
-    for off in 1..(king_loc.x.min(king_loc.y)) {
+    for off in 1..(king_loc.x.min(king_loc.y)+1) {
         let other = (king_loc.x - off, king_loc.y - off);
         let piece = board.piece_at(other);
         if !piece.is_empty() {
@@ -46,7 +52,7 @@ pub fn king_check(board: &impl Board, color: Color) -> bool{
         }
     }
 
-    for off in 1..((7 - king_loc.x).min(king_loc.y)) {
+    for off in 1..((7 - king_loc.x).min(king_loc.y)+1) {
         let other = (king_loc.x + off, king_loc.y - off);
         let piece = board.piece_at(other);
         if !piece.is_empty() {
@@ -59,7 +65,7 @@ pub fn king_check(board: &impl Board, color: Color) -> bool{
         }
     }
 
-    for off in 1..((7 - king_loc.x).min(7 - king_loc.y)) {
+    for off in 1..((7 - king_loc.x).min(7 - king_loc.y)+1) {
         let other = (king_loc.x + off, king_loc.y + off);
         let piece = board.piece_at(other);
         if !piece.is_empty() {
@@ -72,7 +78,7 @@ pub fn king_check(board: &impl Board, color: Color) -> bool{
         }
     }
 
-    for off in 1..(king_loc.x.min(7 - king_loc.y)) {
+    for off in 1..(king_loc.x.min(7 - king_loc.y)+1) {
         let other = (king_loc.x - off, king_loc.y + off);
         let piece = board.piece_at(other);
         if !piece.is_empty() {

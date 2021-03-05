@@ -25,7 +25,7 @@ fn main() {
 
     let rp = Minimax::new();
     loop {
-        thread::sleep(Duration::from_millis(1000));
+        // thread::sleep(Duration::from_millis(1000));
 
         if let Some(i) = rp.make_move(b) {
             b = i;
