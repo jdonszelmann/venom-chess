@@ -239,7 +239,15 @@ impl Board for BasicBoard {
     }
 
     fn is_terminal(&self) -> Option<Color> {
-        unimplemented!()
+        if self.all_moves().len() == 0 {
+            if king_check(self,self.current) {
+                return Some(self.current.other());
+            } else {
+                return Some(Color::EmptyColor);
+            }
+        }
+
+        None
     }
 
     fn current_player(&self) -> Color {
