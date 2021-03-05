@@ -86,6 +86,38 @@ impl Piece {
     }
 }
 
+pub fn knight_of_color(color : Color) -> Piece {
+    if color == White {
+        Piece::WhiteKnight
+    } else {
+        Piece::BlackKnight
+    }
+}
+
+pub fn bishop_of_color(color : Color) -> Piece {
+    if color == White {
+        Piece::WhiteBishop
+    } else {
+        Piece::BlackBishop
+    }
+}
+
+pub fn rook_of_color(color : Color) -> Piece {
+    if color == White {
+        Piece::WhiteRook
+    } else {
+        Piece::BlackRook
+    }
+}
+
+pub fn queen_of_color(color : Color) -> Piece {
+    if color == White {
+        Piece::WhiteQueen
+    } else {
+        Piece::BlackQueen
+    }
+}
+
 impl fmt::Display for Piece {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.color() == Color::White {
