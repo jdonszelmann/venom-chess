@@ -6,6 +6,9 @@ use crossterm::QueueableCommand;
 use crossterm::terminal::ClearType::All;
 use crossterm::cursor::MoveTo;
 use crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind, read, EnableMouseCapture, DisableMouseCapture};
+use crate::game_engine::piece::{Piece, queen_of_color, rook_of_color, bishop_of_color, knight_of_color};
+use crate::game_engine::color::Color;
+use crate::game_engine::chess_move::Extra;
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -139,13 +142,32 @@ fn unix_repl_impl(mut board: BasicBoard) -> crossterm::Result<()> {
 
         let m: Move = ((sx, sy), (dx, dy)).into();
 
-        if !moves.contains(&m) {
+        if let Some(mut i) = moves.iter().find(|&cm| cm.from == m.from && cm.to == m.to).copied() {
+            if i.extra.is_promotion() {
+                i.extra = do_promotion_input(board.current)?;
+            }
+
+            // board = board.transition(m);
+        } else {
             println!("Invalid move!");
             continue;
         }
-
-        board = board.transition(m);
     }
+}
+
+fn do_promotion_input(color: Color) -> crossterm::Result<Extra> {
+    let mut stdout = std::io::stdout();
+
+    stdout.queue(Clear(All))?;
+    stdout.queue(MoveTo(8, 2))?;
+
+
+    print!("{}", queen_of_color(color));
+    print!("{}", rook_of_color(color));
+    print!("{}", bishop_of_color(color));
+    print!("{}", knight_of_color(color));
+
+    Ok(Extra::QueenPromotion)
 }
 
 pub fn unix_repl(mut board: BasicBoard) {

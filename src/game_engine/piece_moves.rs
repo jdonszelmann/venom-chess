@@ -1,4 +1,4 @@
-use crate::game_engine::chess_move::{Location, Move};
+use crate::game_engine::chess_move::{Location, Move, Extra};
 use crate::game_engine::board::Board;
 use crate::game_engine::color::Color::{Black, White};
 use crate::game_engine::king_check::king_check;
@@ -15,10 +15,11 @@ pub fn pawn_moves_black(location: Location, board: &impl Board) -> Vec<Move> {
     let in_front = (location.x, location.y + 1).into();
     if board.piece_at(in_front).is_empty(){
         if location.y == 6 {
-            moves.push((location, in_front, 8).into());
-            moves.push((location, in_front, 9).into());
-            moves.push((location, in_front, 10).into());
-            moves.push((location, in_front, 11).into());
+
+            moves.push((location, in_front, Extra::KnightPromotion).into());
+            moves.push((location, in_front, Extra::BishopPromotion).into());
+            moves.push((location, in_front, Extra::RookPromotion).into());
+            moves.push((location, in_front, Extra::QueenPromotion).into());
 
         } else {
             moves.push((location, in_front).into());
@@ -38,10 +39,10 @@ pub fn pawn_moves_black(location: Location, board: &impl Board) -> Vec<Move> {
         if !piece.is_empty() {
             if piece.color() != our_color {
                 if location.y == 6 {
-                    moves.push((location, other, 8).into());
-                    moves.push((location, other, 9).into());
-                    moves.push((location, other, 10).into());
-                    moves.push((location, other, 11).into());
+                    moves.push((location, other, Extra::KnightPromotion).into());
+                    moves.push((location, other, Extra::BishopPromotion).into());
+                    moves.push((location, other, Extra::RookPromotion).into());
+                    moves.push((location, other, Extra::QueenPromotion).into());
 
                 } else {
                     moves.push((location, other).into());
@@ -56,10 +57,10 @@ pub fn pawn_moves_black(location: Location, board: &impl Board) -> Vec<Move> {
         if !piece.is_empty() {
             if piece.color() != our_color {
                 if location.y == 6 {
-                    moves.push((location, other, 8).into());
-                    moves.push((location, other, 9).into());
-                    moves.push((location, other, 10).into());
-                    moves.push((location, other, 11).into());
+                    moves.push((location, other, Extra::KnightPromotion).into());
+                    moves.push((location, other, Extra::BishopPromotion).into());
+                    moves.push((location, other, Extra::RookPromotion).into());
+                    moves.push((location, other, Extra::QueenPromotion).into());
 
                 } else {
                     moves.push((location, other).into());
@@ -94,10 +95,10 @@ pub fn pawn_moves_white(location: Location, board: &impl Board) -> Vec<Move> {
     let in_front = (location.x, location.y - 1).into();
     if board.piece_at(in_front).is_empty(){
         if location.y == 1 {
-            moves.push((location, in_front, 8).into());
-            moves.push((location, in_front, 9).into());
-            moves.push((location, in_front, 10).into());
-            moves.push((location, in_front, 11).into());
+            moves.push((location, in_front, Extra::KnightPromotion).into());
+            moves.push((location, in_front, Extra::BishopPromotion).into());
+            moves.push((location, in_front, Extra::RookPromotion).into());
+            moves.push((location, in_front, Extra::QueenPromotion).into());
 
         } else {
             moves.push((location, in_front).into());
@@ -117,10 +118,10 @@ pub fn pawn_moves_white(location: Location, board: &impl Board) -> Vec<Move> {
         if !piece.is_empty() {
             if piece.color() != our_color {
                 if location.y == 1 {
-                    moves.push((location, other, 8).into());
-                    moves.push((location, other, 9).into());
-                    moves.push((location, other, 10).into());
-                    moves.push((location, other, 11).into());
+                    moves.push((location, other, Extra::KnightPromotion).into());
+                    moves.push((location, other, Extra::BishopPromotion).into());
+                    moves.push((location, other, Extra::RookPromotion).into());
+                    moves.push((location, other, Extra::QueenPromotion).into());
 
                 } else {
                     moves.push((location, other).into());
@@ -135,10 +136,10 @@ pub fn pawn_moves_white(location: Location, board: &impl Board) -> Vec<Move> {
         if !piece.is_empty() {
             if piece.color() != our_color {
                 if location.y == 1 {
-                    moves.push((location, other, 8).into());
-                    moves.push((location, other, 9).into());
-                    moves.push((location, other, 10).into());
-                    moves.push((location, other, 11).into());
+                    moves.push((location, other, Extra::KnightPromotion).into());
+                    moves.push((location, other, Extra::BishopPromotion).into());
+                    moves.push((location, other, Extra::RookPromotion).into());
+                    moves.push((location, other, Extra::QueenPromotion).into());
 
                 } else {
                     moves.push((location, other).into());

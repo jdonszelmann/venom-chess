@@ -147,7 +147,7 @@ impl From<((i8, i8), (i8, i8))> for Move {
         Self {
             from: from.into(),
             to: to.into(),
-            extra: 0
+            extra: Extra::Quiet
         }
     }
 }

@@ -1,5 +1,5 @@
 
-use crate::game_engine::chess_move::{Location, Move};
+use crate::game_engine::chess_move::{Location, Move, Extra};
 use crate::game_engine::piece::{Piece, knight_of_color, bishop_of_color, rook_of_color, queen_of_color};
 use crate::game_engine::color::Color::*;
 use crate::game_engine::color::Color;
@@ -199,11 +199,12 @@ impl Board for BasicBoard {
             }
         }
 
+
         match m.extra {
-            8 => *new_board.piece_at_mut(m.to) = knight_of_color(movable.color()),
-            9 => *new_board.piece_at_mut(m.to) = bishop_of_color(movable.color()),
-            10 => *new_board.piece_at_mut(m.to) = rook_of_color(movable.color()),
-            11 => *new_board.piece_at_mut(m.to) = queen_of_color(movable.color()),
+            Extra::KnightPromotion => *new_board.piece_at_mut(m.to) = knight_of_color(movable.color()),
+            Extra::BishopPromotion => *new_board.piece_at_mut(m.to) = bishop_of_color(movable.color()),
+            Extra::RookPromotion => *new_board.piece_at_mut(m.to) = rook_of_color(movable.color()),
+            Extra::QueenPromotion => *new_board.piece_at_mut(m.to) = queen_of_color(movable.color()),
             _ => *new_board.piece_at_mut(m.to) = movable
         }
 
