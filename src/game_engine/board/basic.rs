@@ -207,13 +207,15 @@ impl Board for BasicBoard {
 
         new_board.material_score += self.piece_at(m.to).material_worth();
 
-        match m.extra {
-            Extra::KnightPromotion => *new_board.piece_at_mut(m.to) = knight_of_color(movable.color()),
-            Extra::BishopPromotion => *new_board.piece_at_mut(m.to) = bishop_of_color(movable.color()),
-            Extra::RookPromotion => *new_board.piece_at_mut(m.to) = rook_of_color(movable.color()),
-            Extra::QueenPromotion => *new_board.piece_at_mut(m.to) = queen_of_color(movable.color()),
-            _ => *new_board.piece_at_mut(m.to) = movable
-        }
+        let set_piece = match m.extra {
+            Extra::KnightPromotion =>  knight_of_color(movable.color()),
+            Extra::BishopPromotion => bishop_of_color(movable.color()),
+            Extra::RookPromotion => rook_of_color(movable.color()),
+            Extra::QueenPromotion => queen_of_color(movable.color()),
+            _ => movable,
+        };
+
+        *new_board.piece_at_mut(m.to) = set_piece;
 
         *new_board.piece_at_mut(m.from)= Piece::Empty;
 
@@ -237,7 +239,15 @@ impl Board for BasicBoard {
     }
 
     fn is_terminal(&self) -> Option<Color> {
-        unimplemented!()
+        if self.all_moves().len() == 0 {
+            if king_check(self,self.current) {
+                return Some(self.current.other());
+            } else {
+                return Some(Color::EmptyColor);
+            }
+        }
+
+        None
     }
 
     fn current_player(&self) -> Color {
