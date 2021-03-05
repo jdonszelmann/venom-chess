@@ -1,4 +1,4 @@
-use crate::game_engine::board::BasicBoard;
+use crate::game_engine::board::{BasicBoard, Board};
 use crate::ui::unix_repl;
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
@@ -11,12 +11,12 @@ mod ui;
 
 
 fn main() {
-    let b = BasicBoard::DEFAULT_BOARD;
-    // let mut b = BasicBoard::new();
-    // *b.piece_at_mut((6, 6)) = Piece::BlackKing;
-    // *b.piece_at_mut((7, 5)) = Piece::WhiteKing;
-    // *b.piece_at_mut((5, 7)) = Piece::BlackPawn;
-    // b.current = Color::Black;
+    // let b = BasicBoard::DEFAULT_BOARD;
+    let mut b = BasicBoard::new();
+    *b.piece_at_mut((6, 1)) = Piece::WhitePawn;
+    *b.piece_at_mut((0, 7)) = Piece::WhiteKing;
+    *b.piece_at_mut((7, 7)) = Piece::BlackKing;
+    b.current = Color::White;
 
     unix_repl(b);
 

@@ -9,6 +9,7 @@ use crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind, read, Enabl
 use crate::game_engine::piece::{Piece, queen_of_color, rook_of_color, bishop_of_color, knight_of_color};
 use crate::game_engine::color::Color;
 use crate::game_engine::chess_move::Extra;
+use std::panic::catch_unwind;
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -144,10 +145,16 @@ fn unix_repl_impl(mut board: BasicBoard) -> crossterm::Result<()> {
 
         if let Some(mut i) = moves.iter().find(|&cm| cm.from == m.from && cm.to == m.to).copied() {
             if i.extra.is_promotion() {
-                i.extra = do_promotion_input(board.current)?;
+                if let Some(e) = do_promotion_input(board.current)? {
+
+                    // FIXME: Capturing promotions
+                    i.extra = e
+                } else {
+                    continue
+                }
             }
 
-            // board = board.transition(m);
+            board = board.transition(i);
         } else {
             println!("Invalid move!");
             continue;
@@ -155,19 +162,36 @@ fn unix_repl_impl(mut board: BasicBoard) -> crossterm::Result<()> {
     }
 }
 
-fn do_promotion_input(color: Color) -> crossterm::Result<Extra> {
+fn do_promotion_input(color: Color) -> crossterm::Result<Option<Extra>> {
     let mut stdout = std::io::stdout();
 
     stdout.queue(Clear(All))?;
     stdout.queue(MoveTo(8, 2))?;
 
 
-    print!("{}", queen_of_color(color));
-    print!("{}", rook_of_color(color));
-    print!("{}", bishop_of_color(color));
-    print!("{}", knight_of_color(color));
+    print!("\x1b[100m{}\x1b[0m", queen_of_color(color));
+    print!("\x1b[45m{}\x1b[0m", rook_of_color(color));
+    print!("\x1b[100m{}\x1b[0m", bishop_of_color(color));
+    print!("\x1b[45m{}\x1b[0m", knight_of_color(color));
 
-    Ok(Extra::QueenPromotion)
+
+
+    stdout.flush().unwrap();
+
+    let coord = match get_mouse_input() {
+        Ok(a) => a,
+        Err(ErrorKind::Exit) => return Ok(None),
+        Err(ErrorKind::UndoMove) => return Ok(None),
+        Err(ErrorKind::Redraw) => return do_promotion_input(color),
+    };
+
+    Ok(Some(match coord {
+        (2, 1) => Extra::QueenPromotion,
+        (3, 1) => Extra::RookPromotion,
+        (4, 1) => Extra::BishopPromotion,
+        (5, 1) => Extra::KnightPromotion,
+        _ => return do_promotion_input(color)
+    }))
 }
 
 pub fn unix_repl(mut board: BasicBoard) {
@@ -179,14 +203,19 @@ pub fn unix_repl(mut board: BasicBoard) {
         }
     }
 
-    match unix_repl_impl(board) {
-        Ok(_) => (),
-        Err(e) => println!("{}", e.to_string())
-    };
+    let _ = catch_unwind(|| {
+
+        match unix_repl_impl(board) {
+            Ok(_) => (),
+            Err(e) => println!("{}", e.to_string())
+        };
+
+    });
 
     let mut stdout = std::io::stdout();
     disable_raw_mode().unwrap();
     stdout.queue(DisableMouseCapture).unwrap();
+
 }
 
 pub fn repl(mut board: BasicBoard) {
@@ -233,11 +262,49 @@ pub fn repl(mut board: BasicBoard) {
 
         let m: Move = ((sx, sy), (dx, dy)).into();
 
-        if !moves.contains(&m) {
+        if let Some(mut i) = moves.iter().find(|&cm| cm.from == m.from && cm.to == m.to).copied() {
+            if i.extra.is_promotion() {
+                if let Some(e) = do_promotion_input_fallback(board.current).unwrap() {
+
+                    // FIXME: Capturing promotions
+                    i.extra = e
+                } else {
+                    continue
+                }
+            }
+
+            board = board.transition(i);
+        } else {
             println!("Invalid move!");
             continue;
         }
-
-        board = board.transition(m);
     }
+}
+
+fn do_promotion_input_fallback(color: Color) -> crossterm::Result<Option<Extra>> {
+    println!("1: Queen");
+    println!("2: Rook");
+    println!("3: Bishop");
+    println!("4: Knight");
+
+    let mut stdin = std::io::stdin();
+
+    let mut buf = String::new();
+    stdin.read_line(&mut buf).expect("couldn't read line from stdin");
+
+    let value: u64 = match buf.trim().parse() {
+        Ok(i) => i,
+        Err(_) => {
+            println!("Couldn't parse input as number");
+            return do_promotion_input_fallback(color);
+        },
+    };
+
+    Ok(Some(match value {
+        1 => Extra::QueenPromotion,
+        2 => Extra::RookPromotion,
+        3 => Extra::BishopPromotion,
+        4 => Extra::KnightPromotion,
+        _ => return do_promotion_input_fallback(color)
+    }))
 }
