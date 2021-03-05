@@ -3,11 +3,12 @@ pub use basic::BasicBoard;
 use crate::game_engine::chess_move::{Location, Move};
 use crate::game_engine::color::Color;
 use crate::game_engine::piece::Piece;
+use std::fmt;
 
 pub mod basic;
 pub mod zobrist;
 
-pub trait Board: Sized + Clone {
+pub trait Board: Sized + Clone + fmt::Display{
     fn moves(&self, location: impl Into<Location>) -> Vec<Move>;
     fn all_moves(&self) -> Vec<Move>;
 

@@ -21,7 +21,7 @@ impl Minimax {
             let mut best = -std::i8::MAX;
             for m in board.all_moves(){
                 let new_board = board.transition(m);
-                let score = Minimax::mini_max(new_board,3);
+                let score = Minimax::mini_max(&new_board,3);
                 if score>best {
                     best = score;
                     best_moves = Vec::new();
@@ -36,7 +36,7 @@ impl Minimax {
             let mut best = std::i8::MAX;
             for m in board.all_moves(){
                 let new_board = board.transition(m);
-                let score = Minimax::mini_max(new_board,3);
+                let score = Minimax::mini_max(&new_board,3);
                 if score<best {
                     best = score;
                     best_moves = Vec::new();
@@ -61,14 +61,14 @@ impl Minimax {
             let mut value = -std::i8::MAX;
             for m in board.all_moves(){
                 let new_board = board.transition(m);
-                value = value.max(Minimax::mini_max(new_board,depth-1));
+                value = value.max(Minimax::mini_max(&new_board,depth-1));
             }
             return value;
         } else {
             let mut value = std::i8::MAX;
             for m in board.all_moves(){
                 let new_board = board.transition(m);
-                value = value.min(Minimax::mini_max(new_board,depth-1));
+                value = value.min(Minimax::mini_max(&new_board,depth-1));
             }
             return value;
         }

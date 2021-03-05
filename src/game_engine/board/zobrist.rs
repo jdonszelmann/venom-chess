@@ -196,6 +196,10 @@ impl<B> Board for ZobristBoard<B> where B: Board {
         self.inner.get_en_passant()
     }
 
+    fn get_material_score(&self) -> i8 {
+        self.inner.get_material_score()
+    }
+
     #[inline]
     fn piece_at(&self, l: impl Into<Location>) -> Piece {
         self.inner.piece_at(l)
