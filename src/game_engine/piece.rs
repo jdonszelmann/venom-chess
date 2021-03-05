@@ -84,6 +84,24 @@ impl Piece {
             _ => Black,
         }
     }
+
+    pub fn material_worth(&self) -> i8{
+        match self{
+            Piece::Empty => 0,
+            Piece::BlackPawn => 1,
+            Piece::WhitePawn => -1,
+            Piece::BlackBishop => 3,
+            Piece::WhiteBishop => -3,
+            Piece::BlackKnight => 3,
+            Piece::WhiteKnight => -3,
+            Piece::BlackRook => 5,
+            Piece::WhiteRook => -5,
+            Piece::BlackKing => 127,
+            Piece::WhiteKing => -127,
+            Piece::BlackQueen => 9,
+            Piece::WhiteQueen => -9,
+        }
+    }
 }
 
 pub fn knight_of_color(color : Color) -> Piece {
