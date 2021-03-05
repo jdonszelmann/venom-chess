@@ -1,5 +1,3 @@
-use std::fmt;
-
 pub use basic::BasicBoard;
 
 use crate::game_engine::chess_move::{Location, Move};
@@ -20,8 +18,5 @@ pub trait Board: Sized {
 
     fn piece_at(&self, l: impl Into<Location>) -> Piece;
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece;
-
-
-
 }
 

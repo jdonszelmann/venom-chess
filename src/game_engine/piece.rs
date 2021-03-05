@@ -1,5 +1,3 @@
-use crate::game_engine::board::BasicBoard;
-use crate::game_engine::chess_move::{Location, Move};
 use crate::game_engine::color::Color::{White, EmptyColor, Black};
 use std::fmt;
 use crate::game_engine::color::Color;

@@ -1,4 +1,4 @@
-use crate::game_engine::board::{BasicBoard, Board};
+use crate::game_engine::board::Board;
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
 

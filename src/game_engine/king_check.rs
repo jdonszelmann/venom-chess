@@ -1,4 +1,4 @@
-use crate::game_engine::board::{BasicBoard, Board};
+use crate::game_engine::board::Board;
 use crate::game_engine::piece::Piece;
 use crate::game_engine::piece::Piece::*;
 use crate::game_engine::color::Color::*;

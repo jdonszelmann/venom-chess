@@ -1,15 +1,11 @@
 use crate::game_engine::board::{BasicBoard, Board};
 use crate::game_engine::chess_move::Move;
 use std::io::Write;
-// use termion::raw::{IntoRawMode, RawTerminal};
-// use std::io::{Write, Stdout};
-// use crate::game_engine::chess_move::Move;
-// use termion::input::{MouseTerminal, TermRead};
-// use termion::event::{Event, MouseEvent, Key};
-// use termion::{cursor, terminal_size};
-// use std::thread;
-// use std::time::Duration;
-
+use crossterm::terminal::{enable_raw_mode, disable_raw_mode, Clear, size};
+use crossterm::QueueableCommand;
+use crossterm::terminal::ClearType::All;
+use crossterm::cursor::MoveTo;
+use crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind, MouseButton, read, EnableMouseCapture, DisableMouseCapture};
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -33,7 +29,7 @@ fn parse_input(input: &str) -> Option<(i8, i8)> {
 
 
 fn mouse_pos_to_coord(x: u16, y: u16) -> (i8, i8) {
-    ((x - 3) as i8 / 3, y as i8 - 2)
+    ((x - 2) as i8 / 3, y as i8 - 1)
 }
 
 enum ErrorKind {
@@ -43,113 +39,133 @@ enum ErrorKind {
 }
 
 
-// fn get_mouse_input(stdout: &mut MouseTerminal<RawTerminal<Stdout>>) -> Result<(i8, i8), ErrorKind> {
-//     let size = terminal_size().unwrap();
-//
-//     for c in std::io::stdin().events() {
-//         let new_size = terminal_size().unwrap();
-//         if new_size != size {
-//             return Err(ErrorKind::Redraw)
-//         }
-//
-//
-//         let evt = c.unwrap();
-//         match evt {
-//             Event::Key(Key::Ctrl('c')) => return Err(ErrorKind::Exit),
-//             Event::Key(Key::Ctrl('d')) => return Err(ErrorKind::Exit),
-//             Event::Key(Key::Esc) => return Err(ErrorKind::UndoMove),
-//             Event::Mouse(me) => {
-//                 match me {
-//                     MouseEvent::Release(a, b) |
-//                     MouseEvent::Hold(a, b) => {
-//                         let (x, y) = mouse_pos_to_coord(a, b);
-//
-//                         if x < 0 || x >= 8 || y < 0 || y >= 8 {
-//                             continue
-//                         }
-//
-//                         return Ok((x, y))
-//                     }
-//                     _ => (),
-//                 }
-//             }
-//             _ => {}
-//         }
-//         stdout.flush().unwrap();
-//     }
-//
-//     return Err(ErrorKind::Exit)
-// }
-//
-// pub fn unix_repl(mut board: BasicBoard) {
-//     let mut stdout = MouseTerminal::from(match std::io::stdout().into_raw_mode() {
-//         Ok(i) => i,
-//         Err(_) => {
-//             println!("failed to switch to raw ANSI user input mode");
-//             return repl(board)
-//         },
-//     });
-//
-//
-//     'outer: loop {
-//         print!("{}", termion::clear::All);
-//         print!("{}", cursor::Goto(1, 1));
-//
-//         stdout.suspend_raw_mode().unwrap();
-//         println!();
-//
-//         board.highlight(Vec::new());
-//         println!("{}", board);
-//         stdout.flush().expect("couldn't flush stdout");
-//         stdout.activate_raw_mode().unwrap();
-//
-//         let (sx, sy) = loop {
-//             match get_mouse_input(&mut stdout) {
-//                 Ok(a) => break a,
-//                 Err(ErrorKind::Exit) => return,
-//                 Err(ErrorKind::UndoMove) => continue,
-//                 Err(ErrorKind::Redraw) => continue 'outer,
-//             };
-//         };
-//
-//         let moves = board.moves((sx, sy));
-//
-//         print!("{}", termion::clear::All);
-//         print!("{}", cursor::Goto(1, 1));
-//
-//         stdout.suspend_raw_mode().unwrap();
-//         println!();
-//
-//         if board.piece_at((sx, sy)).color() != board.current {
-//             println!("that's not your piece!");
-//             continue;
-//         }
-//
-//         board.highlight(moves.iter().map(|i| i.to).collect());
-//         println!("{}", board);
-//         stdout.flush().expect("couldn't flush stdout");
-//         stdout.activate_raw_mode().unwrap();
-//
-//         let (dx, dy) = loop{
-//             match get_mouse_input(&mut stdout) {
-//                 Ok(a) => break a,
-//                 Err(ErrorKind::Exit) => return,
-//                 Err(ErrorKind::UndoMove) => continue 'outer,
-//                 Err(ErrorKind::Redraw) => continue 'outer,
-//             };
-//         };
-//
-//         let m: Move = ((sx, sy), (dx, dy)).into();
-//
-//         if !moves.contains(&m) {
-//             println!("Invalid move!");
-//             continue;
-//         }
-//
-//         board = board.transition(m);
-//     }
-// }
-//
+fn get_mouse_input() -> Result<(i8, i8), ErrorKind> {
+    let mut stdout = std::io::stdout();
+
+    loop {
+        let e = read().map_err(|_| ErrorKind::Exit)?;
+        match e {
+            Event::Key(k) => {
+                if (k.code == KeyCode::Char('c') || k.code == KeyCode::Char('d')) && k.modifiers.contains(KeyModifiers::CONTROL) {
+                    return Err(ErrorKind::Exit)
+                }
+
+                if k.code == KeyCode::Esc {
+                    return Err(ErrorKind::UndoMove);
+                }
+            },
+            Event::Resize(_, _) => {
+                return Err(ErrorKind::Redraw)
+            }
+            Event::Mouse(me) => {
+                // println!("{:?}", me.kind);
+                if let MouseEventKind::Up(_) = me.kind {
+                    let (x, y) = mouse_pos_to_coord(me.column, me.row);
+
+                    if x < 0 || x >= 8 || y < 0 || y >= 8 {
+                        continue
+                    }
+
+                    return Ok((x, y))
+                }
+            }
+            _ => {}
+        }
+        stdout.flush().unwrap();
+    }
+}
+
+fn unix_repl_impl(mut board: BasicBoard) -> crossterm::Result<()> {
+    let mut stdout = std::io::stdout();
+    stdout.flush()?;
+    disable_raw_mode()?;
+    stdout.flush()?;
+    enable_raw_mode()?;
+
+    stdout.queue(EnableMouseCapture)?;
+
+    'outer: loop {
+        stdout.queue(Clear(All))?;
+        stdout.queue(MoveTo(0, 0))?;
+
+        disable_raw_mode()?;
+        println!();
+
+        board.highlight(Vec::new());
+        println!("{}", board);
+        stdout.flush().expect("couldn't flush stdout");
+        enable_raw_mode()?;
+
+        let (sx, sy) = loop {
+            match get_mouse_input() {
+                Ok(a) => break a,
+                Err(ErrorKind::Exit) => {
+                    return Ok(())
+                },
+                Err(ErrorKind::UndoMove) => continue,
+                Err(ErrorKind::Redraw) => continue 'outer,
+            };
+        };
+
+        let moves = board.moves((sx, sy));
+
+        stdout.queue(Clear(All))?;
+        stdout.queue(MoveTo(0, 0))?;
+
+        disable_raw_mode()?;
+        println!();
+
+        if board.piece_at((sx, sy)).color() != board.current {
+            println!("that's not your piece!");
+            continue;
+        }
+
+        board.highlight(moves.iter().map(|i| i.to).collect());
+        println!("{}", board);
+        stdout.flush().expect("couldn't flush stdout");
+        enable_raw_mode()?;
+
+        let (dx, dy) = loop{
+            match get_mouse_input() {
+                Ok(a) => break a,
+                Err(ErrorKind::Exit) => {
+                    disable_raw_mode()?;
+                    return Ok(())
+                },
+                Err(ErrorKind::UndoMove) => continue 'outer,
+                Err(ErrorKind::Redraw) => continue 'outer,
+            };
+        };
+
+        let m: Move = ((sx, sy), (dx, dy)).into();
+
+        if !moves.contains(&m) {
+            println!("Invalid move!");
+            continue;
+        }
+
+        board = board.transition(m);
+    }
+}
+
+pub fn unix_repl(mut board: BasicBoard) {
+    match enable_raw_mode() {
+        Ok(_) => (),
+        Err(_) => {
+            println!("Failed to enable raw mode, using fallback");
+            return repl(board);
+        }
+    }
+
+    match unix_repl_impl(board) {
+        Ok(_) => (),
+        Err(e) => println!("{}", e.to_string())
+    };
+
+    let mut stdout = std::io::stdout();
+    disable_raw_mode().unwrap();
+    stdout.queue(DisableMouseCapture);
+}
 
 pub fn repl(mut board: BasicBoard) {
     let stdin = std::io::stdin();

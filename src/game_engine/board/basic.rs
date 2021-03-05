@@ -7,8 +7,6 @@ use crate::game_engine::piece::Piece::*;
 use std::fmt;
 use crate::game_engine::board::Board;
 use crate::game_engine::king_check::king_check;
-use std::iter::{Filter, Flatten, Map};
-use std::ops::Range;
 use crate::game_engine::piece_moves::{pawn_moves_black, pawn_moves_white, bishop_moves, knight_moves, rook_moves, king_moves, queen_moves};
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
