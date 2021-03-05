@@ -14,12 +14,20 @@ pub fn pawn_moves_black(location: Location, board: &impl Board) -> Vec<Move> {
 
     let in_front = (location.x, location.y + 1).into();
     if board.piece_at(in_front).is_empty(){
-        moves.push((location, in_front).into());
+        if location.y == 6 {
+            moves.push((location, in_front, 8).into());
+            moves.push((location, in_front, 9).into());
+            moves.push((location, in_front, 10).into());
+            moves.push((location, in_front, 11).into());
 
-        if location.y == 1 {
-            let double_in_front = (location.x, location.y + 2).into();
-                if board.piece_at(double_in_front).is_empty(){
-                moves.push((location, double_in_front).into());
+        } else {
+            moves.push((location, in_front).into());
+
+            if location.y == 1 {
+                let double_in_front = (location.x, location.y + 2).into();
+                if board.piece_at(double_in_front).is_empty() {
+                    moves.push((location, double_in_front).into());
+                }
             }
         }
     }
@@ -29,7 +37,15 @@ pub fn pawn_moves_black(location: Location, board: &impl Board) -> Vec<Move> {
         let piece = board.piece_at(other);
         if !piece.is_empty() {
             if piece.color() != our_color {
-                moves.push((location, other).into());
+                if location.y == 6 {
+                    moves.push((location, other, 8).into());
+                    moves.push((location, other, 9).into());
+                    moves.push((location, other, 10).into());
+                    moves.push((location, other, 11).into());
+
+                } else {
+                    moves.push((location, other).into());
+                }
             }
         }
     }
@@ -39,7 +55,15 @@ pub fn pawn_moves_black(location: Location, board: &impl Board) -> Vec<Move> {
         let piece = board.piece_at(other);
         if !piece.is_empty() {
             if piece.color() != our_color {
-                moves.push((location, other).into());
+                if location.y == 6 {
+                    moves.push((location, other, 8).into());
+                    moves.push((location, other, 9).into());
+                    moves.push((location, other, 10).into());
+                    moves.push((location, other, 11).into());
+
+                } else {
+                    moves.push((location, other).into());
+                }
             }
         }
     }
@@ -69,12 +93,20 @@ pub fn pawn_moves_white(location: Location, board: &impl Board) -> Vec<Move> {
 
     let in_front = (location.x, location.y - 1).into();
     if board.piece_at(in_front).is_empty(){
-        moves.push((location, in_front).into());
+        if location.y == 1 {
+            moves.push((location, in_front, 8).into());
+            moves.push((location, in_front, 9).into());
+            moves.push((location, in_front, 10).into());
+            moves.push((location, in_front, 11).into());
 
-        if location.y == 6 {
-            let double_in_front = (location.x, location.y - 2).into();
-            if board.piece_at(double_in_front).is_empty(){
-                moves.push((location, double_in_front).into());
+        } else {
+            moves.push((location, in_front).into());
+
+            if location.y == 6 {
+                let double_in_front = (location.x, location.y - 2).into();
+                if board.piece_at(double_in_front).is_empty() {
+                    moves.push((location, double_in_front).into());
+                }
             }
         }
     }
@@ -84,7 +116,15 @@ pub fn pawn_moves_white(location: Location, board: &impl Board) -> Vec<Move> {
         let piece = board.piece_at(other);
         if !piece.is_empty() {
             if piece.color() != our_color {
-                moves.push((location, other).into());
+                if location.y == 1 {
+                    moves.push((location, other, 8).into());
+                    moves.push((location, other, 9).into());
+                    moves.push((location, other, 10).into());
+                    moves.push((location, other, 11).into());
+
+                } else {
+                    moves.push((location, other).into());
+                }
             }
         }
     }
@@ -94,7 +134,15 @@ pub fn pawn_moves_white(location: Location, board: &impl Board) -> Vec<Move> {
         let piece = board.piece_at(other);
         if !piece.is_empty() {
             if piece.color() != our_color {
-                moves.push((location, other).into());
+                if location.y == 1 {
+                    moves.push((location, other, 8).into());
+                    moves.push((location, other, 9).into());
+                    moves.push((location, other, 10).into());
+                    moves.push((location, other, 11).into());
+
+                } else {
+                    moves.push((location, other).into());
+                }
             }
         }
     }

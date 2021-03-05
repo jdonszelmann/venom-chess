@@ -26,13 +26,15 @@ impl From<(i8, i8)> for Location {
 pub struct Move {
     pub from: Location,
     pub to: Location,
+    pub extra: u8,
 }
 
 impl Move {
-    pub fn new(from: Location, to: Location) -> Self {
+    pub fn new(from: Location, to: Location, extra: u8) -> Self {
         Self {
             from,
-            to
+            to,
+            extra,
         }
     }
 }
@@ -40,7 +42,15 @@ impl Move {
 impl From<(Location, Location)> for Move {
     fn from((from, to): (Location, Location)) -> Self {
         Self {
-            from, to
+            from, to, extra:0,
+        }
+    }
+}
+
+impl From<(Location, Location, u8)> for Move {
+    fn from((from, to, extra): (Location, Location, u8)) -> Self {
+        Self {
+            from, to, extra,
         }
     }
 }
@@ -50,6 +60,17 @@ impl From<((i8, i8), (i8, i8))> for Move {
         Self {
             from: from.into(),
             to: to.into(),
+            extra: 0
+        }
+    }
+}
+
+impl From<((i8, i8), (i8, i8), u8)> for Move {
+    fn from((from, to, extra): ((i8, i8), (i8, i8), u8)) -> Self {
+        Self {
+            from: from.into(),
+            to: to.into(),
+            extra,
         }
     }
 }
