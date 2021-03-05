@@ -107,6 +107,44 @@ impl Extra {
             Extra::QueenPromotionCapture => Some(queen_of_color(color)),
         }
     }
+
+    pub fn make_capturing(&self) -> Option<Extra> {
+        match self {
+            Extra::Quiet => None,
+            Extra::DoublePawn => None,
+            Extra::KingCastle => None,
+            Extra::QueenCastle => None,
+            Extra::Captures => None,
+            Extra::EnPassantCaptures => None,
+            Extra::KnightPromotion => Some(Extra::KnightPromotionCapture),
+            Extra::BishopPromotion => Some(Extra::BishopPromotionCapture),
+            Extra::RookPromotion => Some(Extra::RookPromotionCapture),
+            Extra::QueenPromotion => Some(Extra::QueenPromotionCapture),
+            Extra::KnightPromotionCapture => Some(Extra::KnightPromotionCapture),
+            Extra::BishopPromotionCapture => Some(Extra::BishopPromotionCapture),
+            Extra::RookPromotionCapture => Some(Extra::RookPromotionCapture),
+            Extra::QueenPromotionCapture => Some(Extra::QueenPromotionCapture),
+        }
+    }
+
+    pub fn make_non_capturing(&self) -> Option<Extra> {
+        match self {
+            Extra::Quiet => None,
+            Extra::DoublePawn => None,
+            Extra::KingCastle => None,
+            Extra::QueenCastle => None,
+            Extra::Captures => None,
+            Extra::EnPassantCaptures => None,
+            Extra::KnightPromotion => Some(Extra::KnightPromotion),
+            Extra::BishopPromotion => Some(Extra::BishopPromotion),
+            Extra::RookPromotion => Some(Extra::RookPromotion),
+            Extra::QueenPromotion => Some(Extra::QueenPromotion),
+            Extra::KnightPromotionCapture => Some(Extra::KnightPromotion),
+            Extra::BishopPromotionCapture => Some(Extra::BishopPromotion),
+            Extra::RookPromotionCapture => Some(Extra::RookPromotion),
+            Extra::QueenPromotionCapture => Some(Extra::QueenPromotion),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
