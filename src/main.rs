@@ -8,6 +8,8 @@ use crate::game_engine::chess_move::Move;
 use crate::ai::random_play::RandomPlay;
 use std::time::Duration;
 use std::thread;
+use crate::game_engine::piece::Piece;
+use crate::game_engine::piece::Color::Black;
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -83,20 +85,25 @@ fn repl(mut board: Board) {
 }
 
 fn main() {
-    let mut b = Board::DEFAULT_BOARD;
+    // let mut b = Board::DEFAULT_BOARD;
+    let mut b= Board::new();
 
-    // repl(b);
+    *b.piece_at_mut((7,5).into()) = Piece::WhiteKing;
+    *b.piece_at_mut((6,7).into()) = Piece::BlackKing;
+    *b.piece_at_mut((5,7).into()) = Piece::BlackPawn;
+    b.current = Black;
+    repl(b);
 
-    let rp = RandomPlay::new();
-    loop {
-        thread::sleep(Duration::from_millis(10));
-
-        if let Some(i) = rp.make_move(b) {
-            b = i;
-        } else {
-            println!("No moves left");
-            break
-        }
-        println!("{}", b);
-    }
+    // let rp = RandomPlay::new();
+    // loop {
+    //     // thread::sleep(Duration::from_millis(10));
+    //
+    //     if let Some(i) = rp.make_move(b) {
+    //         b = i;
+    //     } else {
+    //         println!("No moves left");
+    //         break
+    //     }
+    //     println!("{}", b);
+    // }
 }

@@ -137,7 +137,6 @@ impl Board {
                         return true
                     }
                 }
-                break;
             }
         }
 
@@ -162,7 +161,6 @@ impl Board {
                         return true
                     }
                 }
-                break;
             }
 
         }
