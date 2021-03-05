@@ -26,7 +26,8 @@ impl From<(i8, i8)> for Location {
 
 
 #[repr(u8)]
-enum Extra {
+#[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
+pub enum Extra {
     Quiet = 0,
     DoublePawn = 1,
     KingCastle = 2,
