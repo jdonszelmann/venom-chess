@@ -1,4 +1,4 @@
-use crate::game_engine::board::Board;
+use crate::game_engine::board::{BasicBoard, Board};
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
 
@@ -10,10 +10,10 @@ impl RandomPlay {
         Self {}
     }
 
-    pub fn make_move(&self, board: Board) -> Option<Board> {
+    pub fn make_move<B: Board>(&self, board: B) -> Option<B> {
         let mut rng = thread_rng();
 
-        let m = board.possible_moves().choose(&mut rng)?;
+        let m = board.all_moves().into_iter().choose(&mut rng)?;
 
         Some(board.transition(m))
     }

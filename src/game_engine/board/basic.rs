@@ -1,12 +1,18 @@
-use crate::game_engine::piece::{Piece, Color};
-use crate::game_engine::piece::Piece::*;
-use crate::game_engine::chess_move::{Move, Location};
-use std::fmt;
-use crate::game_engine::piece::Color::*;
 
+use crate::game_engine::chess_move::{Location, Move};
+use crate::game_engine::piece::Piece;
+use crate::game_engine::color::Color::*;
+use crate::game_engine::color::Color;
+use crate::game_engine::piece::Piece::*;
+use std::fmt;
+use crate::game_engine::board::Board;
+use crate::game_engine::king_check::king_check;
+use std::iter::{Filter, Flatten, Map};
+use std::ops::Range;
+use crate::game_engine::piece_moves::{pawn_moves_black, pawn_moves_white, bishop_moves, knight_moves, rook_moves, king_moves, queen_moves};
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
-pub struct Board {
+pub struct BasicBoard {
     pub board: [[Piece; 8]; 8],
 
     pub current: Color,
@@ -14,8 +20,8 @@ pub struct Board {
     pub highlighted: Vec<Location>
 }
 
-impl Board {
-    pub const DEFAULT_BOARD: Board = Board {
+impl BasicBoard {
+    pub const DEFAULT_BOARD: BasicBoard = BasicBoard {
         board: [
             [BlackRook, BlackKnight, BlackBishop, BlackQueen, BlackKing, BlackBishop, BlackKnight, BlackRook],
             [BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn],
@@ -40,25 +46,50 @@ impl Board {
         }
     }
 
-    #[inline]
-    pub fn get_pieces<'a>(&'a self) -> impl Iterator<Item = (Piece, Location)> + 'a {
-        (0..8).map(move |i| (0..8).map(move |j| {
-            let l = (i, j).into();
-            (self.piece_at(l), l)
-        }))
-            .flatten()
-            .filter(|(i, _)| !i.is_empty())
-            .filter(move |(i, _)| i.color() == self.current)
+
+    pub fn highlight(&mut self, locations: Vec<Location>) {
+        self.highlighted = locations;
+    }
+}
+
+impl Board for BasicBoard {
+
+    fn moves(&self, location: impl Into<Location>) -> Vec<Move> {
+        let location = location.into();
+        match self.piece_at(location) {
+            Piece::Empty => Vec::new(),
+
+            Piece::BlackPawn => pawn_moves_black(location, self),
+            Piece::WhitePawn => pawn_moves_white(location, self),
+
+            Piece::BlackBishop => bishop_moves(location, self),
+            Piece::WhiteBishop => bishop_moves(location, self),
+
+            Piece::BlackKnight => knight_moves(location, self),
+            Piece::WhiteKnight => knight_moves(location, self),
+
+            Piece::BlackRook => rook_moves(location, self),
+            Piece::WhiteRook => rook_moves(location, self),
+
+            Piece::BlackKing => king_moves(location, self),
+            Piece::WhiteKing => king_moves(location, self),
+
+            Piece::BlackQueen => queen_moves(location, self),
+            Piece::WhiteQueen => queen_moves(location, self),
+        }.into_iter()
+            .filter(move |&i| !king_check(self.transition(i), self.current))
+            .collect()
     }
 
-    #[inline]
-    pub fn possible_moves<'a>(&'a self) -> impl Iterator<Item = Move> + 'a {
-        self.get_pieces()
+    fn all_moves(&self) -> Vec<Move> {
+        self.all_pieces()
+            .into_iter()
             .map(move |(_, l)| self.moves(l))
             .flatten()
+            .collect()
     }
 
-    pub fn transition(&self, m: Move) -> Self {
+    fn transition(&self, m: Move) -> Self {
         let mut new_board = self.clone();
         let movable = self.piece_at(m.from);
 
@@ -70,55 +101,33 @@ impl Board {
         new_board
     }
 
-    #[inline]
-    pub(crate) fn moves(&self, l: impl Into<Location> + Copy) -> Vec<Move> {
-        self.piece_at(l)
-            .moves(l, self)
-            .into_iter()
-            .filter(move |&i| !self.transition(i).king_check(self.current))
+    fn all_pieces(&self) -> Vec<(Piece, Location)> {
+        (0..8).map(move |i| (0..8).map(move |j| {
+            let l = (i, j).into();
+            (self.piece_at(l), l)
+        }))
+            .flatten()
+            .filter(|(i, _)| !i.is_empty())
+            .filter(move |(i, _)| i.color() == self.current)
             .collect()
     }
 
-    pub fn piece_at(&self, l: impl Into<Location>) -> Piece {
+    fn is_terminal(&self) -> Option<Color> {
+        unimplemented!()
+    }
+
+    fn piece_at(&self, l: impl Into<Location>) -> Piece {
         let l = l.into();
         self.board[l.y as usize][l.x as usize]
     }
 
-    pub fn piece_at_mut(&mut self, l: Location) -> &mut Piece {
+    fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece {
+        let l = l.into();
         &mut self.board[l.y as usize][l.x as usize]
-    }
-
-    pub fn king_location(&self, color: Color) -> Option<Location> {
-        if color == Color::White {
-            for y in 0..8 {
-                for x in 0..8 {
-                    let other = self.piece_at((x, y));
-                    if other == Piece::WhiteKing{
-                        return Some((x,y).into());
-                    }
-                }
-            }
-        } else {
-            for y in 0..8 {
-                for x in 0..8 {
-                    let other = self.piece_at((x, y));
-                    if other == Piece::BlackKing{
-                        return Some((x,y).into());
-                    }
-                }
-            }
-        }
-        None
-    }
-
-
-
-    pub fn highlight(&mut self, locations: Vec<Location>) {
-        self.highlighted = locations;
     }
 }
 
-impl fmt::Display for Board {
+impl fmt::Display for BasicBoard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for y in 0..8 {
             write!(f, "{} ", y)?;
