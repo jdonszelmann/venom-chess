@@ -215,6 +215,10 @@ impl Board for BasicBoard {
             _ => movable,
         };
 
+        if m.extra.is_promotion() {
+            new_board.material_score -= set_piece.material_worth();
+        }
+
         *new_board.piece_at_mut(m.to) = set_piece;
 
         *new_board.piece_at_mut(m.from)= Piece::Empty;
@@ -270,6 +274,10 @@ impl Board for BasicBoard {
 
     fn get_en_passant(&self) -> i8 {
         self.en_passant
+    }
+
+    fn get_material_score(&self) -> i8 {
+        self.material_score
     }
 }
 
