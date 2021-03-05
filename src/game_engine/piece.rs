@@ -96,8 +96,8 @@ impl Piece {
             Piece::WhiteKnight => -3,
             Piece::BlackRook => 5,
             Piece::WhiteRook => -5,
-            Piece::BlackKing => 127,
-            Piece::WhiteKing => -127,
+            Piece::BlackKing => 0,
+            Piece::WhiteKing => -0,
             Piece::BlackQueen => 9,
             Piece::WhiteQueen => -9,
         }

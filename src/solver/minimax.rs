@@ -46,7 +46,7 @@ impl Solver for Minimax {
             let mut best = -std::i8::MAX;
             for m in board.all_moves(){
                 let new_board = board.transition(m);
-                let score = Minimax::mini_max(&new_board,3);
+                let score = Minimax::mini_max(&new_board,0);
                 if score>best {
                     best = score;
                     best_moves = Vec::new();
