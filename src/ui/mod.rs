@@ -10,6 +10,7 @@ use crate::game_engine::piece::{Piece, queen_of_color, rook_of_color, bishop_of_
 use crate::game_engine::color::Color;
 use crate::game_engine::chess_move::Extra;
 use std::panic::catch_unwind;
+use crate::ai::Solver;
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -79,7 +80,7 @@ fn get_mouse_input() -> Result<(i8, i8), ErrorKind> {
     }
 }
 
-fn unix_repl_impl(mut board: BasicBoard) -> crossterm::Result<()> {
+fn unix_repl_impl<S: Solver>(mut board: BasicBoard, solver: Option<S>) -> crossterm::Result<()> {
     let mut stdout = std::io::stdout();
     stdout.flush()?;
     disable_raw_mode()?;
@@ -99,6 +100,20 @@ fn unix_repl_impl(mut board: BasicBoard) -> crossterm::Result<()> {
         println!("{}", board);
         stdout.flush().expect("couldn't flush stdout");
         enable_raw_mode()?;
+
+        if board.current_player() == Color::Black {
+            if let Some(ref s) = solver {
+                board = match s.make_move(board) {
+                    Some(i) => i,
+                    None => {
+                        println!("Couldn't make move");
+                        return Ok(());
+                    },
+                };
+                continue;
+            }
+        }
+
 
         let (sx, sy) = loop {
             match get_mouse_input() {
@@ -194,23 +209,23 @@ fn do_promotion_input(color: Color) -> crossterm::Result<Option<Extra>> {
     }))
 }
 
-pub fn unix_repl(mut board: BasicBoard) {
+pub fn unix_repl<S: Solver>(mut board: BasicBoard, solver: Option<S>) {
     match enable_raw_mode() {
         Ok(_) => (),
         Err(_) => {
             println!("Failed to enable raw mode, using fallback");
-            return repl(board);
+            return repl(board, solver);
         }
     }
 
-    let _ = catch_unwind(|| {
+    // let _ = catch_unwind(|| {
 
-        match unix_repl_impl(board) {
-            Ok(_) => (),
-            Err(e) => println!("{}", e.to_string())
-        };
+    match unix_repl_impl(board, solver) {
+        Ok(_) => (),
+        Err(e) => println!("{}", e.to_string())
+    };
 
-    });
+    // });
 
     let mut stdout = std::io::stdout();
     disable_raw_mode().unwrap();
@@ -218,7 +233,7 @@ pub fn unix_repl(mut board: BasicBoard) {
 
 }
 
-pub fn repl(mut board: BasicBoard) {
+pub fn repl<S: Solver>(mut board: BasicBoard, solver: Option<S>) {
     let stdin = std::io::stdin();
 
     loop {
@@ -227,6 +242,19 @@ pub fn repl(mut board: BasicBoard) {
         println!("{}", board);
         print!("? ");
         std::io::stdout().flush().expect("couldn't flush stdout");
+
+        if board.current_player() == Color::Black {
+            if let Some(ref s) = solver {
+                board = match s.make_move(board) {
+                    Some(i) => i,
+                    None => {
+                        println!("Couldn't make move");
+                        return ();
+                    },
+                };
+                continue;
+            }
+        }
 
         stdin.read_line(&mut buf).expect("couldn't read line from stdin");
 

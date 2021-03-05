@@ -18,7 +18,7 @@ fn main() {
     *b.piece_at_mut((7, 7)) = Piece::BlackKing;
     b.current = Color::White;
 
-    unix_repl(b);
+    unix_repl::<Minimax>(b, None);
 
     // let rp = RandomPlay::new();
     // loop {
