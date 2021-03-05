@@ -2,8 +2,7 @@ use crate::game_engine::piece::{Piece, Color};
 use crate::game_engine::piece::Piece::*;
 use crate::game_engine::chess_move::{Move, Location};
 use std::fmt;
-use crate::game_engine::piece::Color::{White, Black};
-use std::io::SeekFrom::Current;
+use crate::game_engine::piece::Color::*;
 
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
@@ -55,7 +54,7 @@ impl Board {
     #[inline]
     pub fn possible_moves<'a>(&'a self) -> impl Iterator<Item = Move> + 'a {
         self.get_pieces()
-            .map(move |(p, l)| self.moves(l))
+            .map(move |(_, l)| self.moves(l))
             .flatten()
     }
 

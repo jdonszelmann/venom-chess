@@ -1,6 +1,6 @@
 use crate::game_engine::board::Board;
 use crate::game_engine::chess_move::{Location, Move};
-use crate::game_engine::piece::Color::{White, Empty, Black};
+use crate::game_engine::piece::Color::{White, EmptyColor, Black};
 use std::fmt;
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
@@ -82,7 +82,7 @@ impl Piece {
 
     pub fn color(&self) -> Color {
         match self {
-            Piece::Empty => Empty,
+            Piece::Empty => EmptyColor,
             Piece::WhitePawn => White,
             Piece::WhiteBishop => White,
             Piece::WhiteKnight => White,
@@ -126,7 +126,7 @@ impl fmt::Display for Piece {
 pub enum Color {
     Black,
     White,
-    Empty,
+    EmptyColor,
 }
 
 impl Color {
@@ -134,7 +134,7 @@ impl Color {
         match self {
             Black => White,
             White => Black,
-            Empty => Empty,
+            EmptyColor => EmptyColor,
         }
     }
 }
