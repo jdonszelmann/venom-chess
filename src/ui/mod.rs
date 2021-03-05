@@ -1,11 +1,11 @@
 use crate::game_engine::board::{BasicBoard, Board};
 use crate::game_engine::chess_move::Move;
 use std::io::Write;
-use crossterm::terminal::{enable_raw_mode, disable_raw_mode, Clear, size};
+use crossterm::terminal::{enable_raw_mode, disable_raw_mode, Clear};
 use crossterm::QueueableCommand;
 use crossterm::terminal::ClearType::All;
 use crossterm::cursor::MoveTo;
-use crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind, MouseButton, read, EnableMouseCapture, DisableMouseCapture};
+use crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind, read, EnableMouseCapture, DisableMouseCapture};
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
