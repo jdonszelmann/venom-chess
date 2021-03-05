@@ -288,7 +288,6 @@ pub fn king_moves(location: Location, board: &impl Board) -> Vec<Move> {
         }
 
         let castling_rights = board.get_castling_rights();
-        println!("{:?}",castling_rights);
         if !king_check(board,our_color) {
             if our_color == Black {
                 if castling_rights[0] {
@@ -327,7 +326,6 @@ pub fn king_moves(location: Location, board: &impl Board) -> Vec<Move> {
                     }
                 }
                 if castling_rights[3] {
-                    println!("!!!!!!!!!!!!!!!!!!!!");
                     if board.piece_at((5,7)).is_empty()
                         && board.piece_at((6,7)).is_empty() {
                         let temp_board = board.clone();
