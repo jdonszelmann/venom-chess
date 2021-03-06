@@ -153,20 +153,22 @@ impl<B> Board for PSTBoard<B> where B: Board {
         self.inner.all_moves()
     }
 
-    fn transition_with_move_func(&self, m: Move, mut func: impl FnMut(Piece, Location, Location, Piece)) -> Self {
+    fn transition_with_move_func(&self, m: Move, mut remove_piece: impl FnMut(Piece, Location), mut add_piece: impl FnMut(Piece, Location)) -> Self {
         let mut hv = self.heuristic_value;
 
 
-        let inner = self.inner.transition_with_move_func(m, |p, f, t, r| {
-            hv += self.piece_at(f).material_worth();
-            hv -= p.material_worth();
-            hv += r.material_worth();
+        let inner = self.inner.transition_with_move_func(m, |p, l| {
+            // hv += self.piece_at(f).material_worth();
+            // hv -= p.material_worth();
+            // hv += r.material_worth();
+            //
+            // hv -= pos_score(self.piece_at(f), f);
+            // hv += pos_score(p, t);
+            // hv -= pos_score(r, t);
 
-            hv -= pos_score(self.piece_at(f), f);
-            hv += pos_score(p, t);
-            hv -= pos_score(r, t);
-
-            func(p, f, t, r);
+            remove_piece(p, l);
+        }, |p, l| {
+            add_piece(p, l);
         });
 
 

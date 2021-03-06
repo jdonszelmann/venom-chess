@@ -91,7 +91,7 @@ impl Board for BasicBoard {
             .collect()
     }
 
-    fn transition_with_move_func(&self, m: Move, mut func: impl FnMut(Piece, Location, Location, Piece)) -> Self {
+    fn transition_with_move_func(&self, m: Move, mut remove_piece: impl FnMut(Piece, Location), mut add_piece: impl FnMut(Piece, Location)) -> Self {
         let mut new_board = self.clone();
 
         let movable = self.piece_at(m.from);
@@ -152,14 +152,16 @@ impl Board for BasicBoard {
                 *new_board.piece_at_mut((3,0)) = Piece::BlackRook;
                 *new_board.piece_at_mut((0,0))= Piece::Empty;
 
-                func(Piece::BlackRook, (0,0).into(), (3,0).into(), Piece::Empty);
+                remove_piece(Piece::BlackRook, (0, 0).into());
+                add_piece(Piece::BlackRook, (3, 0).into());
             }
 
             if m == ((4,0),(6,0)).into(){
                 *new_board.piece_at_mut((5,0)) = Piece::BlackRook;
                 *new_board.piece_at_mut((7,0))= Piece::Empty;
 
-                func(Piece::BlackRook, (7,0).into(), (5,0).into(), Piece::Empty);
+                remove_piece(Piece::BlackRook, (7, 0).into());
+                add_piece(Piece::BlackRook, (5, 0).into());
             }
         }
 
@@ -169,7 +171,7 @@ impl Board for BasicBoard {
                 let old = new_board.piece_at(l);
                 *new_board.piece_at_mut((m.to.x,m.to.y-1)) = Piece::Empty;
 
-                func(Piece::Empty, l.into(), l.into(), old);
+                remove_piece(old, l.into());
                 new_board.material_score += old.material_worth();
             }
         }
@@ -180,7 +182,7 @@ impl Board for BasicBoard {
                 let old = new_board.piece_at(l);
                 *new_board.piece_at_mut(l) = Piece::Empty;
 
-                func(Piece::Empty, l.into(), l.into(), old);
+                remove_piece(old, l.into());
                 new_board.material_score += old.material_worth();
             }
         }
@@ -190,14 +192,16 @@ impl Board for BasicBoard {
                 *new_board.piece_at_mut((3,7)) = Piece::WhiteRook;
                 *new_board.piece_at_mut((0,7))= Piece::Empty;
 
-                func(Piece::WhiteRook, (0,7).into(), (3,7).into(), Piece::Empty);
+                remove_piece(Piece::WhiteRook, (0, 7).into());
+                add_piece(Piece::WhiteRook, (3, 7).into());
             }
 
             if m == ((4,7),(6,7)).into(){
                 *new_board.piece_at_mut((5,7)) = Piece::WhiteRook;
                 *new_board.piece_at_mut((7,7))= Piece::Empty;
 
-                func(Piece::WhiteRook, (7,7).into(), (5,7).into(), Piece::Empty);
+                remove_piece(Piece::WhiteRook, (7, 7).into());
+                add_piece(Piece::WhiteRook, (5, 7).into());
             }
         }
 
@@ -214,11 +218,18 @@ impl Board for BasicBoard {
         *new_board.piece_at_mut(m.to) = set_piece;
         *new_board.piece_at_mut(m.from)= Piece::Empty;
 
-        func(movable, m.from, m.to, replaces);
+        // remove piece at location (if exists)
+        if !replaces.is_empty() {
+            remove_piece(replaces, m.to);
+        }
+
+        // remove piece at source location
+        remove_piece(movable, m.from);
+        // add piece at destination location
+        add_piece(set_piece, m.to);
 
         if m.extra.is_promotion() {
             new_board.material_score -= set_piece.material_worth();
-            func(set_piece, m.to, m.to, movable);
         }
 
         new_board.current = self.current.other();

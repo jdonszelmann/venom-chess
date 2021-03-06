@@ -73,9 +73,9 @@ impl<B> Board for DisplayableBoard<B> where B: Board {
     }
 
     #[inline]
-    fn transition_with_move_func(&self, m: Move, func: impl FnMut(Piece, Location, Location, Piece)) -> Self {
+    fn transition_with_move_func(&self, m: Move, mut remove_piece: impl FnMut(Piece, Location), mut add_piece: impl FnMut(Piece, Location)) -> Self {
         Self {
-            inner: self.inner.transition_with_move_func(m, func),
+            inner: self.inner.transition_with_move_func(m, remove_piece, add_piece),
             highlighted: self.highlighted.clone()
         }
     }
