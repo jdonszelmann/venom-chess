@@ -15,7 +15,7 @@ pub struct BasicBoard {
     pub current: Color,
     pub castling_rights : [bool; 4],
     pub en_passant : i8,
-    pub material_score : i8,
+    pub material_score : i32,
 }
 
 impl BasicBoard {
@@ -266,7 +266,7 @@ impl Board for BasicBoard {
         self.en_passant
     }
 
-    fn get_material_score(&self) -> i8 {
+    fn get_material_score(&self) -> i32 {
         self.material_score
     }
 }

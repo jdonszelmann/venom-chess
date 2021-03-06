@@ -27,9 +27,9 @@ fn main() {
 
     unix_repl::<_, Minimax>(b, Some(solver));
 
-    // let rp = Minimax::new();
+    // let rp = AlphaBeta::new();
     // loop {
-    //     thread::sleep(Duration::from_millis(1000));
+    //     // thread::sleep(Duration::from_millis(1000));
     //
     //     if let Some(i) = rp.make_move(b) {
     //         b = i;
