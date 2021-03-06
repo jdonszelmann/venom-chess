@@ -8,23 +8,128 @@ use rand::{SeedableRng, RngCore, Rng};
 use lazy_static::lazy_static;
 use std::fmt;
 
+const TABLE_PAWN: [[i32; 8]; 8] = [
+    [0, 0, 0, 0, 0, 0, 0, 0, ],
+    [50, 50, 50, 50, 50, 50, 50, 50, ],
+    [10, 10, 20, 30, 30, 20, 10, 10, ],
+    [5, 5, 10, 25, 25, 10, 5, 5, ],
+    [0, 0, 0, 20, 20, 0, 0, 0, ],
+    [5, -5, -10, 0, 0, -10, -5, 5, ],
+    [5, 10, 10, -20, -20, 10, 10, 5, ],
+    [0, 0, 0, 0, 0, 0, 0, 0, ],
+];
 
-#[derive(Clone, Eq, PartialEq, Debug)]
-pub struct ZobristBoard<B> {
-    inner: B,
-    heuristic_value: u64
+const TABLE_KNIGHT: [[i32; 8]; 8] = [
+    [-50, -40, -30, -30, -30, -30, -40, -50, ],
+    [-40, -20, 0, 0, 0, 0, -20, -40, ],
+    [-30, 0, 10, 15, 15, 10, 0, -30, ],
+    [-30, 5, 15, 20, 20, 15, 5, -30, ],
+    [-30, 0, 15, 20, 20, 15, 0, -30, ],
+    [-30, 5, 10, 15, 15, 10, 5, -30, ],
+    [-40, -20, 0, 5, 5, 0, -20, -40, ],
+    [-50, -40, -30, -30, -30, -30, -40, -50, ],
+];
+
+const TABLE_BISHOP: [[i32; 8]; 8] = [
+    [-20, -10, -10, -10, -10, -10, -10, -20, ],
+    [-10, 0, 0, 0, 0, 0, 0, -10, ],
+    [-10, 0, 5, 10, 10, 5, 0, -10, ],
+    [-10, 5, 5, 10, 10, 5, 5, -10, ],
+    [-10, 0, 10, 10, 10, 10, 0, -10, ],
+    [-10, 10, 10, 10, 10, 10, 10, -10, ],
+    [-10, 5, 0, 0, 0, 0, 5, -10, ],
+    [-20, -10, -10, -10, -10, -10, -10, -20, ],
+];
+
+const TABLE_ROOK: [[i32; 8]; 8] = [
+    [0, 0, 0, 0, 0, 0, 0, 0, ],
+    [5, 10, 10, 10, 10, 10, 10, 5, ],
+    [-5, 0, 0, 0, 0, 0, 0, -5, ],
+    [-5, 0, 0, 0, 0, 0, 0, -5, ],
+    [-5, 0, 0, 0, 0, 0, 0, -5, ],
+    [-5, 0, 0, 0, 0, 0, 0, -5, ],
+    [-5, 0, 0, 0, 0, 0, 0, -5, ],
+    [0, 0, 0, 5, 5, 0, 0, 0],
+];
+
+const TABLE_QUEEN: [[i32; 8]; 8] = [
+    [-20, -10, -10, -5, -5, -10, -10, -20, ],
+    [-10, 0, 0, 0, 0, 0, 0, -10, ],
+    [-10, 0, 5, 5, 5, 5, 0, -10, ],
+    [-5, 0, 5, 5, 5, 5, 0, -5, ],
+    [0, 0, 5, 5, 5, 5, 0, -5, ],
+    [-10, 5, 5, 5, 5, 5, 0, -10, ],
+    [-10, 0, 5, 0, 0, 0, 0, -10, ],
+    [-20, -10, -10, -5, -5, -10, -10, -20],
+];
+
+const TABLE_KING_MIDDLE: [[i32; 8]; 8] = [
+    [-30, -40, -40, -50, -50, -40, -40, -30, ],
+    [-30, -40, -40, -50, -50, -40, -40, -30, ],
+    [-30, -40, -40, -50, -50, -40, -40, -30, ],
+    [-30, -40, -40, -50, -50, -40, -40, -30, ],
+    [-20, -30, -30, -40, -40, -30, -30, -20, ],
+    [-10, -20, -20, -20, -20, -20, -20, -10, ],
+    [20, 20, 0, 0, 0, 0, 20, 20, ],
+    [20, 30, 10, 0, 0, 10, 30, 20],
+];
+
+pub fn pos_score(p: Piece, l: Location) -> i32 {
+    if p.color() == Color::EmptyColor {
+        return 0;
+    }
+    let x = if p.color() == Color::White {
+        l.x
+    } else {
+        7 - l.x
+    };
+    let y = if p.color() == Color::White {
+        l.y
+    } else {
+        7 - l.y
+    };
+
+    let mul = if p.color() == Color::White {
+        1
+    } else {
+        -1
+    };
+
+    if p.is_pawn() {
+        return TABLE_PAWN[y as usize][x as usize] * mul;
+    }
+    if p.is_knight() {
+        return TABLE_KNIGHT[y as usize][x as usize] * mul;
+    }
+    if p.is_bishop() {
+        return TABLE_BISHOP[y as usize][x as usize] * mul;
+    }
+    if p.is_rook() {
+        return TABLE_ROOK[y as usize][x as usize] * mul;
+    }
+    if p.is_queen() {
+        return TABLE_QUEEN[y as usize][x as usize] * mul;
+    }
+    if p.is_king() {
+        return TABLE_KING_MIDDLE[y as usize][x as usize] * mul;
+    }
+    0
 }
 
-impl<B: fmt::Display> fmt::Display for ZobristBoard<B> {
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct PSTBoard<B> {
+    inner: B,
+    pub heuristic_value: i32,
+}
+
+impl<B: fmt::Display> fmt::Display for PSTBoard<B> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.fmt(f)
     }
 }
 
-impl<B: Board> ZobristBoard<B> {
+impl<B: Board> PSTBoard<B> {
     pub fn new(inner: B) -> Self {
-
-
         Self {
             inner,
             heuristic_value: 0,
@@ -32,7 +137,7 @@ impl<B: Board> ZobristBoard<B> {
     }
 }
 
-impl<B> Board for ZobristBoard<B> where B: Board {
+impl<B> Board for PSTBoard<B> where B: Board {
     #[inline]
     fn moves(&self, location: impl Into<Location>) -> Vec<Move> {
         self.inner.moves(location)
@@ -44,12 +149,17 @@ impl<B> Board for ZobristBoard<B> where B: Board {
     }
 
     fn transition_with_move_func(&self, m: Move, mut func: impl FnMut(Piece, Location, Location, Piece)) -> Self {
+        let mut hv = self.heuristic_value;
 
-        let mut previous_hv = self.heuristic_value;
 
         let inner = self.inner.transition_with_move_func(m, |p, f, t, r| {
+            hv += self.piece_at(f).material_worth();
+            hv -= p.material_worth();
+            hv += r.material_worth();
 
-
+            hv -= pos_score(self.piece_at(f), f);
+            hv += pos_score(p, t);
+            hv -= pos_score(r, t);
 
             func(p, f, t, r);
         });
@@ -57,7 +167,7 @@ impl<B> Board for ZobristBoard<B> where B: Board {
 
         Self {
             inner,
-            heuristic_value: previous_hv,
+            heuristic_value: hv,
         }
     }
 
@@ -87,7 +197,7 @@ impl<B> Board for ZobristBoard<B> where B: Board {
     }
 
     fn get_material_score(&self) -> i32 {
-        self.inner.get_material_score()
+        self.heuristic_value
     }
 
     #[inline]
@@ -98,77 +208,5 @@ impl<B> Board for ZobristBoard<B> where B: Board {
     #[inline]
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece {
         self.inner.piece_at_mut(l)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::game_engine::board::{BasicBoard, Board};
-    use crate::game_engine::board::zobrist::{ZobristBoard, ZobristKeys};
-    use super::ZOBRIST_KEYS;
-    use crate::solver::random_play::RandomPlay;
-
-    #[test]
-    fn test_switch_color_twice() {
-        let hash = 0;
-        let hash = ZOBRIST_KEYS.switch_color(hash);
-        assert_ne!(0, hash);
-        let hash = ZOBRIST_KEYS.switch_color(hash);
-        assert_eq!(0, hash);
-    }
-
-    #[test]
-    fn test_hash_move_back() {
-        let board = BasicBoard::DEFAULT_BOARD;
-        let mut zboard = ZobristBoard::new(board);
-
-        let initial_hash = zboard.hash;
-
-        zboard = zboard.transition(((1, 7), (0, 5)).into());
-        assert_ne!(initial_hash, zboard.hash);
-
-        zboard = zboard.transition(((1, 0), (0, 2)).into());
-        assert_ne!(initial_hash, zboard.hash);
-
-        zboard = zboard.transition(((0, 5), (1, 7)).into());
-        assert_ne!(initial_hash, zboard.hash);
-
-        zboard = zboard.transition(((0, 2), (1, 0)).into());
-        assert_eq!(initial_hash, zboard.hash);
-    }
-
-    #[test]
-    fn test_hash_two_boards() {
-        let board1 = BasicBoard::DEFAULT_BOARD;
-        let board2 = BasicBoard::DEFAULT_BOARD;
-        let zboard1 = ZobristBoard::new(board1);
-        let zboard2 = ZobristBoard::new(board2);
-
-        assert_eq!(zboard1.hash, zboard2.hash);
-        assert_ne!(zboard1.hash, 0);
-    }
-
-    #[test]
-    fn test_hash_fuzzer() {
-        for _ in 0..10 {
-            let mut board = BasicBoard::DEFAULT_BOARD;
-            let mut zboard = ZobristBoard::new(board);
-            let random_player = RandomPlay::new();
-
-            for _ in 0..100 {
-                zboard = match random_player.make_move(zboard.clone()) {
-                    Some(i) => i,
-                    None => break,
-                }
-            }
-
-            let zboard2 = ZobristBoard::new(zboard.inner.clone());
-
-            println!("{}", zboard2);
-            println!("{}", zboard);
-
-
-            assert_eq!(zboard.hash, zboard2.hash);
-        }
     }
 }
