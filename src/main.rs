@@ -26,10 +26,11 @@ fn main() {
     // *b.piece_at_mut((7, 7)) = Piece::BlackKing;
     // b.current = Color::White;
 
-    let white_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
-    let black_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
+    // let white_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
+    let black_solver = AlphaBetaTransp::new(5, 1024 * 1024 * 8);
 
-    unix_repl::<_, _, _>(b, Some(black_solver), Some(white_solver));
+    // unix_repl::<_, _, _>(b, Some(black_solver), Some(white_solver));
+    unix_repl::<_, _, AlphaBetaTransp>(b, Some(black_solver), None);
 
     // let rp = AlphaBeta::new();
     // loop {

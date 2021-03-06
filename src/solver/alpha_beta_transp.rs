@@ -196,6 +196,13 @@ impl Solver for AlphaBetaTransp {
             }
         }
 
+        let board_hash = board.hash();
+        self.transposition_table.insert(board_hash, Entry {
+            depth: self.search_depth,
+            value: best,
+            tp: EntryType::Exact
+        });
+
 
         self.last_best = best;
 

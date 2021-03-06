@@ -135,6 +135,7 @@ fn unix_repl_impl<B: Board, S1: Solver, S2: Solver>(mut board: DisplayableBoard<
         }
 
         stdout.queue(EnableMouseCapture)?;
+        stdout.flush().expect("couldn't flush stdout");
         enable_raw_mode()?;
 
         let (sx, sy) = loop {
