@@ -30,7 +30,7 @@ fn main() {
     let black_solver = AlphaBetaTransp::new(5, 1024 * 1024 * 8);
 
     // unix_repl::<_, _, _>(b, Some(black_solver), Some(white_solver));
-    unix_repl::<_, _, AlphaBetaTransp>(b, Some(black_solver), None);
+    unix_repl::<_, AlphaBetaTransp, AlphaBetaTransp>(b, None, None);
 
     // let rp = AlphaBeta::new();
     // loop {
