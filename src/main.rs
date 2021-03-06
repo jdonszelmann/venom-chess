@@ -2,13 +2,13 @@ use crate::game_engine::board::{BasicBoard, Board};
 use crate::ui::unix_repl;
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
-use crate::ai::minimax::Minimax;
+use crate::solver::minimax::Minimax;
 use std::thread;
 use std::time::Duration;
 use crate::ai::alpha_beta::AlphaBeta;
 
 mod game_engine;
-mod ai;
+mod solver;
 mod ui;
 
 

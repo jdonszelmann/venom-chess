@@ -8,97 +8,11 @@ use rand::{SeedableRng, RngCore, Rng};
 use lazy_static::lazy_static;
 use std::fmt;
 
-pub struct ZobristKeys {
-    pieces: [[[u64; 12]; 8]; 8],
-    color: u64,
-    castling: [u64; 4],
-    en_passant: [u64; 8],
-}
-
-impl ZobristKeys {
-    pub fn new(seed: usize) -> Self {
-        let mut seed_bytes = [0u8; 32];
-        for (index, i) in seed_bytes.iter_mut().enumerate() {
-            *i = seed.to_be_bytes()[index % 8];
-        }
-        let mut rng = StdRng::from_seed(seed_bytes);
-
-        let mut pieces = [[[0; 12]; 8]; 8];
-        let mut castling = [0; 4];
-        let mut en_passant = [0; 8];
-
-        let color = rng.gen();
-
-        for i in 0..8 {
-            for j in 0..8 {
-                rng.fill(&mut pieces[j][i]);
-            }
-        }
-        rng.fill(&mut castling);
-        rng.fill(&mut en_passant);
-
-        Self {
-            pieces,
-            color,
-            castling,
-            en_passant,
-        }
-    }
-
-    pub fn move_piece(&self, mut hash: u64, piece_type: Piece, from: Location, to: Location, replaces: Piece) -> u64 {
-        if !piece_type.is_empty() {
-            hash = hash ^ self.pieces[from.y as usize][from.x as usize][piece_type.to_number()];
-            hash = hash ^ self.pieces[to.y as usize][to.x as usize][piece_type.to_number()];
-        }
-        if !replaces.is_empty() {
-            hash = hash ^ self.pieces[from.y as usize][from.x as usize][replaces.to_number()];
-            hash = hash ^ self.pieces[to.y as usize][to.x as usize][replaces.to_number()];
-        }
-
-        hash
-    }
-
-    pub fn apply_castling(&self, mut hash: u64, apply_castling: [bool; 4]) -> u64 {
-        for i in 0..4 {
-            if apply_castling[i] {
-                hash = hash ^ self.castling[i];
-            }
-        }
-        hash
-    }
-
-    pub fn update_castling(&self, hash: u64, previous_rights: [bool; 4], rights: [bool; 4]) -> u64 {
-        let hash = self.apply_castling(hash, previous_rights);
-        let hash = self.apply_castling(hash, rights);
-        hash
-    }
-
-    pub fn apply_en_passant(&self, hash: u64, apply_en_passant: i8) -> u64 {
-        if apply_en_passant >= 8 || apply_en_passant < 0 {
-            hash
-        } else {
-            hash ^ self.en_passant[apply_en_passant as usize]
-        }
-    }
-
-    pub fn update_en_passant(&self, hash: u64, previous_rights: i8, rights: i8) -> u64 {
-        let hash = self.apply_en_passant(hash, previous_rights);
-        let hash = self.apply_en_passant(hash, rights);
-        hash
-    }
-
-    pub fn switch_color(&self, hash: u64) -> u64 {
-        hash ^ self.color
-    }
-}
-
-lazy_static!(static ref ZOBRIST_KEYS: ZobristKeys = ZobristKeys::new(10););
-
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct ZobristBoard<B> {
     inner: B,
-    hash: u64
+    heuristic_value: u64
 }
 
 impl<B: fmt::Display> fmt::Display for ZobristBoard<B> {
@@ -109,36 +23,12 @@ impl<B: fmt::Display> fmt::Display for ZobristBoard<B> {
 
 impl<B: Board> ZobristBoard<B> {
     pub fn new(inner: B) -> Self {
-        let mut hash = 0;
-
-        for i in 0..8 {
-            for j in 0..8 {
-                let location: Location = (i, j).into();
-                let piece = inner.piece_at(location);
-                hash = ZOBRIST_KEYS.move_piece(hash, piece, location, location, Piece::Empty)
-            }
-        }
-
-        // the hash begins at "white"
-        if inner.current_player() == Color::Black {
-            hash = ZOBRIST_KEYS.switch_color(hash);
-        }
-
-        hash = ZOBRIST_KEYS.update_castling(hash, [false; 4], inner.get_castling_rights());
-        hash = ZOBRIST_KEYS.update_en_passant(hash, 8, inner.get_en_passant());
 
 
         Self {
             inner,
-            hash,
+            heuristic_value: 0,
         }
-    }
-}
-
-impl<B> Hash for ZobristBoard<B> {
-    #[inline]
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write_u64(self.hash)
     }
 }
 
@@ -154,20 +44,20 @@ impl<B> Board for ZobristBoard<B> where B: Board {
     }
 
     fn transition_with_move_func(&self, m: Move, mut func: impl FnMut(Piece, Location, Location, Piece)) -> Self {
-        let mut hash = self.hash;
+
+        let mut previous_hv = self.heuristic_value;
 
         let inner = self.inner.transition_with_move_func(m, |p, f, t, r| {
-            hash = ZOBRIST_KEYS.move_piece(hash, p, f, t, r);
+
+
+
             func(p, f, t, r);
         });
 
-        hash = ZOBRIST_KEYS.switch_color(hash);
-        hash = ZOBRIST_KEYS.update_en_passant(hash, self.get_en_passant(), inner.get_en_passant());
-        hash = ZOBRIST_KEYS.update_castling(hash, self.get_castling_rights(), inner.get_castling_rights());
 
         Self {
             inner,
-            hash,
+            heuristic_value: previous_hv,
         }
     }
 

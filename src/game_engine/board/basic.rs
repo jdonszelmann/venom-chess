@@ -169,7 +169,7 @@ impl Board for BasicBoard {
             }
         }
 
-        if movable == BlackPawn && m.to.x!=m.from.x{
+        if movable == BlackPawn && m.to.x != m.from.x{
             if self.piece_at(m.to).is_empty(){
                 let l = (m.to.x,m.to.y-1);
                 let old = new_board.piece_at(l);
@@ -180,7 +180,7 @@ impl Board for BasicBoard {
             }
         }
 
-        if movable == WhitePawn  && m.to.x!=m.from.x{
+        if movable == WhitePawn  && m.to.x != m.from.x{
             if self.piece_at(m.to).is_empty(){
                 let l = (m.to.x,m.to.y+1);
                 let old = new_board.piece_at(l);
@@ -207,8 +207,6 @@ impl Board for BasicBoard {
             }
         }
 
-
-
         let set_piece = match m.extra {
             Extra::KnightPromotion =>  knight_of_color(movable.color()),
             Extra::BishopPromotion => bishop_of_color(movable.color()),
@@ -222,7 +220,6 @@ impl Board for BasicBoard {
         }
 
         *new_board.piece_at_mut(m.to) = set_piece;
-
         *new_board.piece_at_mut(m.from)= Piece::Empty;
 
         func(movable, m.from, m.to, replaces);

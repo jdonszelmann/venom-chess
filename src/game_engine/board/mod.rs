@@ -7,6 +7,7 @@ use std::fmt;
 
 pub mod basic;
 pub mod zobrist;
+pub mod pst;
 
 pub trait Board: Sized + Clone + fmt::Display{
     fn moves(&self, location: impl Into<Location>) -> Vec<Move>;
