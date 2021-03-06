@@ -5,6 +5,7 @@ pub mod minimax;
 pub mod alpha_beta;
 pub mod alpha_beta_transp;
 pub mod move_order;
+pub mod quiescence;
 
 pub trait Solver {
     fn make_move<B: Board>(&mut self, board: B) -> Option<B>;
