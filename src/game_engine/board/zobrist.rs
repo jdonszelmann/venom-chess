@@ -221,6 +221,8 @@ mod tests {
     use crate::game_engine::board::zobrist::{ZobristBoard, ZobristKeys};
     use super::ZOBRIST_KEYS;
     use crate::solver::random_play::RandomPlay;
+    use crate::solver::Solver;
+    use crate::game_engine::board::display::DisplayableBoard;
 
     #[test]
     fn test_switch_color_twice() {
@@ -266,8 +268,8 @@ mod tests {
     fn test_hash_fuzzer() {
         for _ in 0..10 {
             let mut board = BasicBoard::DEFAULT_BOARD;
-            let mut zboard = ZobristBoard::new(board);
-            let random_player = RandomPlay::new();
+            let mut zboard = ZobristBoard::new(DisplayableBoard::new(board));
+            let mut random_player = RandomPlay::new();
 
             for _ in 0..100 {
                 zboard = match random_player.make_move(zboard.clone()) {

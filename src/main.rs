@@ -1,4 +1,4 @@
-use crate::game_engine::board::BasicBoard;
+use crate::game_engine::board::{BasicBoard, Board};
 use crate::ui::unix_repl;
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
@@ -9,6 +9,8 @@ use crate::solver::alpha_beta::AlphaBeta;
 use crate::solver::Solver;
 use crate::game_engine::board::pst::PSTBoard;
 use crate::solver::alpha_beta_transp::AlphaBetaTransp;
+use crate::game_engine::board::display::DisplayableBoard;
+use crate::solver::random_play::RandomPlay;
 
 mod game_engine;
 mod solver;

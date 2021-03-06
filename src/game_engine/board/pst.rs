@@ -77,7 +77,7 @@ pub fn pos_score(p: Piece, l: Location) -> i32 {
     let x = if p.color() == Color::White {
         l.x
     } else {
-        7 - l.x
+        l.x
     };
     let y = if p.color() == Color::White {
         l.y
@@ -114,7 +114,7 @@ pub fn pos_score(p: Piece, l: Location) -> i32 {
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub struct PSTBoard<B> {
-    inner: B,
+    pub(crate) inner: B,
     pub heuristic_value: i32,
 }
 
@@ -126,9 +126,18 @@ impl<B: fmt::Display> fmt::Display for PSTBoard<B> {
 
 impl<B: Board> PSTBoard<B> {
     pub fn new(inner: B) -> Self {
+
+        let mut heuristic = 0;
+
+        for x in  0..8 {
+            for y in  0..8 {
+                heuristic += pos_score(inner.piece_at((x,y)),(x,y).into()) - inner.piece_at((x,y)).material_worth();
+            }
+        }
+
         Self {
             inner,
-            heuristic_value: 0,
+            heuristic_value: heuristic,
         }
     }
 }
@@ -208,5 +217,40 @@ impl<B> Board for PSTBoard<B> where B: Board {
 
     fn hash(&self) -> u64 {
         self.inner.hash()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::game_engine::board::{BasicBoard, Board};
+    use crate::game_engine::board::zobrist::{ZobristBoard, ZobristKeys};
+    use crate::solver::random_play::RandomPlay;
+    use crate::game_engine::board::pst::PSTBoard;
+    use crate::game_engine::board::display::DisplayableBoard;
+    use crate::solver::Solver;
+
+
+    #[test]
+    fn test_hash_fuzzer() {
+        for _ in 0..100 {
+            let mut board = BasicBoard::DEFAULT_BOARD;
+            let mut pst_board = PSTBoard::new(DisplayableBoard::new(board));
+            let mut random_player = RandomPlay::new();
+
+            for _ in 0..50 {
+                pst_board = match random_player.make_move(pst_board.clone()) {
+                    Some(i) => i,
+                    None => break,
+                }
+            }
+
+            let pst_board_2 = PSTBoard::new(pst_board.inner.clone());
+
+            println!("{}", pst_board_2);
+            println!("{}", pst_board);
+
+
+            assert_eq!(pst_board.heuristic_value, pst_board_2.heuristic_value);
+        }
     }
 }
