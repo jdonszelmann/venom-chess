@@ -3,12 +3,16 @@ use crate::game_engine::chess_move::{Move, Location};
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
 use std::fmt;
-
+use crossterm::style::{SetBackgroundColor, SetForegroundColor, Color::Rgb};
+use std::io::stdout;
+use crossterm::QueueableCommand;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub struct DisplayableBoard<B> {
     pub inner: B,
     highlighted: Vec<Location>,
+    last_from: Option<Location>,
+    last_to: Option<Location>,
 }
 
 
@@ -20,13 +24,41 @@ impl<B: Board> fmt::Display for DisplayableBoard<B> {
             for x in 0..8 {
 
                 if (x + y) % 2 == 0{
-                    write!(f, "\x1b[100m")?;
+                    stdout().queue(SetBackgroundColor(Rgb {
+                        r: 64,
+                        g: 64,
+                        b: 64,
+                    })).map_err(|_| fmt::Error::default())?;
                 } else {
-                    write!(f, "\x1b[45m")?;
+                    stdout().queue(SetBackgroundColor(Rgb {
+                        r: 153,
+                        g: 76,
+                        b: 0,
+                    })).map_err(|_| fmt::Error::default())?;
                 }
 
                 if self.highlighted.contains(&(x, y).into()) {
                     write!(f, "\x1b[103m")?;
+                }
+
+                if let Some(lc) = self.last_from {
+                    if x == lc.x && y == lc.y {
+                        stdout().queue(SetBackgroundColor(Rgb {
+                            r: 204,
+                            g: 204,
+                            b: 0,
+                        })).map_err(|_| fmt::Error::default())?;
+                    }
+                }
+
+                if let Some(lc) = self.last_to {
+                    if x == lc.x && y == lc.y {
+                        stdout().queue(SetBackgroundColor(Rgb {
+                            r: 204,
+                            g: 204,
+                            b: 0,
+                        })).map_err(|_| fmt::Error::default())?;
+                    }
                 }
 
                 write!(f, "{}", self.piece_at((x, y)))?;
@@ -52,6 +84,8 @@ impl<B: Board> DisplayableBoard<B> {
         Self {
             inner,
             highlighted: Vec::new(),
+            last_from: None,
+            last_to: None,
         }
     }
 
@@ -74,9 +108,13 @@ impl<B> Board for DisplayableBoard<B> where B: Board {
 
     #[inline]
     fn transition_with_move_func(&self, m: Move, mut remove_piece: impl FnMut(Piece, Location), mut add_piece: impl FnMut(Piece, Location)) -> Self {
+        let res = self.inner.transition_with_move_func(m, remove_piece, add_piece);
+
         Self {
-            inner: self.inner.transition_with_move_func(m, remove_piece, add_piece),
-            highlighted: self.highlighted.clone()
+            inner: res,
+            highlighted: self.highlighted.clone(),
+            last_from: Some(m.from),
+            last_to: Some(m.to),
         }
     }
 
