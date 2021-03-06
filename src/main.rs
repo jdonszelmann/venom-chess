@@ -14,18 +14,18 @@ mod ui;
 
 
 fn main() {
-    // let mut b = BasicBoard::DEFAULT_BOARD;
-    let mut b = BasicBoard::new();
-    *b.piece_at_mut((6, 0)) = Piece::WhiteQueen;
-    *b.piece_at_mut((7, 0)) = Piece::WhiteQueen;
+    let mut b = BasicBoard::DEFAULT_BOARD;
+    // let mut b = BasicBoard::new();
+    // *b.piece_at_mut((6, 0)) = Piece::WhiteQueen;
+    // *b.piece_at_mut((7, 0)) = Piece::WhiteQueen;
+    //
+    // *b.piece_at_mut((3, 7)) = Piece::WhiteKing;
+    // *b.piece_at_mut((4, 1)) = Piece::BlackKing;
+    // b.current = Color::Black;
 
-    *b.piece_at_mut((3, 7)) = Piece::WhiteKing;
-    *b.piece_at_mut((4, 1)) = Piece::BlackKing;
-    b.current = Color::Black;
+    let solver = Minimax::new();
 
-    // let solver = Minimax::new();
-
-    unix_repl::<Minimax>(b, None);
+    unix_repl::<Minimax>(b, Some(solver));
 
     // let rp = Minimax::new();
     // loop {

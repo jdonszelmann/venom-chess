@@ -34,7 +34,7 @@ fn parse_input(input: &str) -> Option<(i8, i8)> {
 
 
 fn mouse_pos_to_coord(x: u16, y: u16) -> (i8, i8) {
-    ((x - 2) as i8 / 3, y as i8 - 1)
+    ((x as i8 - 2) / 3, y as i8 - 1)
 }
 
 enum ErrorKind {
