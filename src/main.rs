@@ -5,6 +5,7 @@ use crate::game_engine::color::Color;
 use crate::solver::minimax::Minimax;
 use std::thread;
 use std::time::Duration;
+use crate::solver::alpha_beta::AlphaBeta;
 
 mod game_engine;
 mod solver;
@@ -23,9 +24,9 @@ fn main() {
     // *b.piece_at_mut((4, 1)) = Piece::BlackKing;
     // b.current = Color::Black;
 
-    let solver = Minimax::new();
+    let solver = AlphaBeta::new();
 
-    unix_repl::<_, Minimax>(b, Some(solver));
+    unix_repl::<_, AlphaBeta>(b, Some(solver));
 
     // let rp = AlphaBeta::new();
     // loop {
