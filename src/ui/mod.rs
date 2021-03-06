@@ -81,7 +81,7 @@ fn get_mouse_input() -> Result<(i8, i8), ErrorKind> {
     }
 }
 
-fn unix_repl_impl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, mut solver: Option<S>) -> crossterm::Result<()> {
+fn unix_repl_impl<B: Board, S1: Solver, S2: Solver>(mut board: DisplayableBoard<B>, mut black_solver: Option<S1>, mut white_solver: Option<S2>) -> crossterm::Result<()> {
     let mut stdout = std::io::stdout();
     stdout.flush()?;
     disable_raw_mode()?;
@@ -95,16 +95,17 @@ fn unix_repl_impl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, mut solve
         stdout.queue(MoveTo(0, 0))?;
 
         disable_raw_mode()?;
+        stdout.queue(DisableMouseCapture)?;
         println!();
 
         board.highlight(Vec::new());
         println!("{}", board);
-        // println!("{}", board.material_score);
+        println!("black solver stats: {}", black_solver.as_ref().map(|i| i.stats()).unwrap_or("".to_string()));
+        println!("white solver stats: {}", white_solver.as_ref().map(|i| i.stats()).unwrap_or("".to_string()));
         stdout.flush().expect("couldn't flush stdout");
-        enable_raw_mode()?;
 
         if board.current_player() == Color::Black {
-            if let Some(ref mut s) = solver {
+            if let Some(ref mut s) = black_solver {
                 println!("Solver is making it's move");
 
                 board = match s.make_move(board) {
@@ -118,6 +119,23 @@ fn unix_repl_impl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, mut solve
             }
         }
 
+        if board.current_player() == Color::White {
+            if let Some(ref mut s) = white_solver {
+                println!("Solver is making it's move");
+
+                board = match s.make_move(board) {
+                    Some(i) => i,
+                    None => {
+                        println!("Couldn't make move");
+                        return Ok(());
+                    },
+                };
+                continue;
+            }
+        }
+
+        stdout.queue(EnableMouseCapture)?;
+        enable_raw_mode()?;
 
         let (sx, sy) = loop {
             match get_mouse_input() {
@@ -213,20 +231,20 @@ fn do_promotion_input(color: Color) -> crossterm::Result<Option<Extra>> {
     }))
 }
 
-pub fn unix_repl<B: Board, S: Solver>(mut board: B, solver: Option<S>) {
+pub fn unix_repl<B: Board, S1: Solver, S2: Solver>(mut board: B, black_solver: Option<S1>, white_solver: Option<S2>) {
     let db = DisplayableBoard::new(board);
 
     match enable_raw_mode() {
         Ok(_) => (),
         Err(_) => {
             println!("Failed to enable raw mode, using fallback");
-            return repl(db, solver);
+            return repl(db, black_solver, white_solver);
         }
     }
 
     // let _ = catch_unwind(|| {
 
-    match unix_repl_impl(db, solver) {
+    match unix_repl_impl(db, black_solver, white_solver) {
         Ok(_) => (),
         Err(e) => println!("{}", e.to_string())
     };
@@ -239,18 +257,35 @@ pub fn unix_repl<B: Board, S: Solver>(mut board: B, solver: Option<S>) {
 
 }
 
-pub fn repl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, mut solver: Option<S>) {
+pub fn repl<B: Board, S1: Solver, S2: Solver>(mut board: DisplayableBoard<B>, mut black_solver: Option<S1>, mut white_solver: Option<S2>) {
     let stdin = std::io::stdin();
 
     loop {
         let mut buf = String::new();
         board.highlight(Vec::new());
         println!("{}", board);
+        println!("black solver stats: {}", black_solver.as_ref().map(|i| i.stats()).unwrap_or("".to_string()));
+        println!("white solver stats: {}", white_solver.as_ref().map(|i| i.stats()).unwrap_or("".to_string()));
         print!("? ");
         std::io::stdout().flush().expect("couldn't flush stdout");
 
         if board.current_player() == Color::Black {
-            if let Some(ref mut s) = solver {
+            if let Some(ref mut s) = black_solver {
+                println!("Solver is making it's move");
+
+                board = match s.make_move(board) {
+                    Some(i) => i,
+                    None => {
+                        println!("Couldn't make move");
+                        return ();
+                    },
+                };
+                continue;
+            }
+        }
+
+        if board.current_player() == Color::White {
+            if let Some(ref mut s) = white_solver {
                 println!("Solver is making it's move");
 
                 board = match s.make_move(board) {
@@ -282,7 +317,6 @@ pub fn repl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, mut solver: Opt
 
         board.highlight(moves.iter().map(|i| i.to).collect());
         println!("{}", board);
-
         print!("? ");
         std::io::stdout().flush().expect("couldn't flush stdout");
 

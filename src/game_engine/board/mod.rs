@@ -10,15 +10,20 @@ pub mod zobrist;
 pub mod pst;
 pub mod display;
 
-pub trait Board: Sized + Clone + Hash + Eq {
+pub trait Board: Sized + Clone {
     fn moves(&self, location: impl Into<Location>) -> Vec<Move>;
     fn all_moves(&self) -> Vec<Move>;
 
     #[inline]
     fn transition(&self, m: Move) -> Self {
-        self.transition_with_move_func(m, |_, _, _, _|{})
+        self.transition_with_move_func(m, |_, _|{}, |_, _|{})
     }
-    fn transition_with_move_func(&self, m: Move, func: impl FnMut(Piece, Location, Location, Piece)) -> Self;
+    fn transition_with_move_func(
+        &self,
+        m: Move,
+        remove_piece: impl FnMut(Piece, Location),
+        add_piece: impl FnMut(Piece, Location),
+    ) -> Self;
 
     fn all_pieces(&self) -> Vec<(Piece, Location)>;
 
@@ -31,5 +36,8 @@ pub trait Board: Sized + Clone + Hash + Eq {
     fn get_material_score(&self) -> i32;
     fn piece_at(&self, l: impl Into<Location>) -> Piece;
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece;
+
+    // TODO: use built in hash trait
+    fn hash(&self) -> u64;
 }
 

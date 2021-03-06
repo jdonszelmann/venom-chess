@@ -97,4 +97,8 @@ impl Solver for AlphaBeta {
 
         Some(board.transition(m))
     }
+
+    fn stats(&self) -> String {
+        "".to_string()
+    }
 }

@@ -153,12 +153,19 @@ impl<B> Board for ZobristBoard<B> where B: Board {
         self.inner.all_moves()
     }
 
-    fn transition_with_move_func(&self, m: Move, mut func: impl FnMut(Piece, Location, Location, Piece)) -> Self {
+    fn transition_with_move_func(&self, m: Move, mut remove_piece: impl FnMut(Piece, Location), mut add_piece: impl FnMut(Piece, Location)) -> Self {
         let mut hash = self.hash;
 
-        let inner = self.inner.transition_with_move_func(m, |p, f, t, r| {
-            hash = ZOBRIST_KEYS.move_piece(hash, p, f, t, r);
-            func(p, f, t, r);
+        let inner = self.inner.transition_with_move_func(m, |p, l| {
+            // TODO:
+            // hash = ZOBRIST_KEYS.move_piece(hash, p, f, t, r);
+
+            remove_piece(p, l);
+        },|p, l| {
+            // TODO:
+            // hash = ZOBRIST_KEYS.move_piece(hash, p, f, t, r);
+
+            add_piece(p, l);
         });
 
         hash = ZOBRIST_KEYS.switch_color(hash);
@@ -208,6 +215,10 @@ impl<B> Board for ZobristBoard<B> where B: Board {
     #[inline]
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece {
         self.inner.piece_at_mut(l)
+    }
+
+    fn hash(&self) -> u64 {
+        self.hash
     }
 }
 
