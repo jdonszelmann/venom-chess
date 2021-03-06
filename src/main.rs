@@ -1,4 +1,4 @@
-use crate::game_engine::board::{BasicBoard, Board};
+use crate::game_engine::board::BasicBoard;
 use crate::ui::unix_repl;
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
@@ -24,20 +24,20 @@ fn main() {
     // *b.piece_at_mut((7, 7)) = Piece::BlackKing;
     // b.current = Color::White;
 
-    // unix_repl(b);
+    let solver = AlphaBeta::new(4);
 
-    let rp = AlphaBeta::new();
-    loop {
-        // thread::sleep(Duration::from_millis(10_000));
+    unix_repl::<_, AlphaBeta>(b, Some(solver));
 
-        if let Some(i) = rp.make_move(b) {
-            b = i;
-
-        } else {
-            println!("No moves left");
-            break
-        }
-        println!("{}", b);
-        println!("Evaluation: {}",b.heuristic_value)
-    }
+    // let rp = AlphaBeta::new();
+    // loop {
+    //     // thread::sleep(Duration::from_millis(1000));
+    //
+    //     if let Some(i) = rp.make_move(b) {
+    //         b = i;
+    //     } else {
+    //         println!("No moves left");
+    //         break
+    //     }
+    //     println!("{}", b);
+    // }
 }

@@ -7,14 +7,18 @@ use std::fs::read;
 use std::i8;
 use crate::solver::Solver;
 
-pub struct AlphaBeta {}
+pub struct AlphaBeta {
+    search_depth: u64
+}
 
 impl AlphaBeta {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(search_depth: u64) -> Self {
+        Self {
+            search_depth
+        }
     }
 
-    pub fn mini_max_ab(board: &impl Board, depth: i64, mut a: i32, mut b: i32) -> i32 {
+    pub fn mini_max_ab(board: &impl Board, depth: u64, mut a: i32, mut b: i32) -> i32 {
         if depth == 0 || board.is_terminal().is_some() {
             let terminal = board.is_terminal();
             if terminal.is_some() {
@@ -33,7 +37,7 @@ impl AlphaBeta {
             let mut value = std::i32::MIN;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
-                value = value.max(AlphaBeta::mini_max_ab(&new_board, depth - 1,a,b));
+                value = value.max(Self::mini_max_ab(&new_board, depth - 1,a,b));
                 a = a.max(value);
                 if a>=b{
                     break;
@@ -44,7 +48,7 @@ impl AlphaBeta {
             let mut value = std::i32::MAX;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
-                value = value.min(AlphaBeta::mini_max_ab(&new_board, depth - 1,a,b));
+                value = value.min(Self::mini_max_ab(&new_board, depth - 1,a,b));
                 b = b.min(value);
                 if b<=a{
                     break;
@@ -56,8 +60,7 @@ impl AlphaBeta {
 }
 
 impl Solver for AlphaBeta {
-
-    fn make_move<B: Board>(&self, board: B) -> Option<B> {
+    fn make_move<B: Board>(&mut self, board: B) -> Option<B> {
         let mut rng = thread_rng();
 
         let mut best_moves = Vec::new();
@@ -66,7 +69,7 @@ impl Solver for AlphaBeta {
             let mut best = std::i32::MIN;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
-                let score = AlphaBeta::mini_max_ab(&new_board, 4, std::i32::MIN, std::i32::MAX);
+                let score = Self::mini_max_ab(&new_board, self.search_depth, std::i32::MIN, std::i32::MAX);
                 if score > best {
                     best = score;
                     best_moves = Vec::new();
@@ -81,7 +84,7 @@ impl Solver for AlphaBeta {
             let mut best = std::i32::MAX;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
-                let score = AlphaBeta::mini_max_ab(&new_board, 4, i32::MIN, i32::MAX);
+                let score = Self::mini_max_ab(&new_board, self.search_depth, i32::MIN, i32::MAX);
                 if score < best {
                     best = score;
                     best_moves = Vec::new();

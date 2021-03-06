@@ -4,6 +4,7 @@ use crate::game_engine::piece::Piece::*;
 use crate::game_engine::color::Color::*;
 use crate::game_engine::color::Color;
 use crate::game_engine::chess_move::Location;
+use crate::game_engine::board::display::DisplayableBoard;
 
 pub fn king_location(board: &impl Board, color: Color) -> Option<Location> {
     if color == Color::White {
@@ -34,7 +35,8 @@ pub fn king_check(board: &impl Board, color: Color) -> bool{
     let king_loc = match king_location(board, color) {
         Some(i) => i,
         None => {
-            println!("{}", board);
+            let db = DisplayableBoard::new(board.clone());
+            println!("{}", db);
             panic!("AAAAAAA");
         }
     };

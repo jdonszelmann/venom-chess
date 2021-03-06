@@ -2,10 +2,6 @@ use crate::game_engine::board::Board;
 use crate::game_engine::chess_move::{Move, Location};
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
-use std::hash::{Hash, Hasher};
-use rand::rngs::StdRng;
-use rand::{SeedableRng, RngCore, Rng};
-use lazy_static::lazy_static;
 use std::fmt;
 
 const TABLE_PAWN: [[i32; 8]; 8] = [
@@ -116,7 +112,7 @@ pub fn pos_score(p: Piece, l: Location) -> i32 {
     0
 }
 
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub struct PSTBoard<B> {
     inner: B,
     pub heuristic_value: i32,

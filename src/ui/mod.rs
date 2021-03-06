@@ -11,6 +11,7 @@ use crate::game_engine::color::Color;
 use crate::game_engine::chess_move::Extra;
 use std::panic::catch_unwind;
 use crate::solver::Solver;
+use crate::game_engine::board::display::DisplayableBoard;
 
 fn parse_input(input: &str) -> Option<(i8, i8)> {
     let mut i = input.trim().split_ascii_whitespace();
@@ -80,7 +81,7 @@ fn get_mouse_input() -> Result<(i8, i8), ErrorKind> {
     }
 }
 
-fn unix_repl_impl<S: Solver>(mut board: BasicBoard, solver: Option<S>) -> crossterm::Result<()> {
+fn unix_repl_impl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, mut solver: Option<S>) -> crossterm::Result<()> {
     let mut stdout = std::io::stdout();
     stdout.flush()?;
     disable_raw_mode()?;
@@ -98,12 +99,12 @@ fn unix_repl_impl<S: Solver>(mut board: BasicBoard, solver: Option<S>) -> crosst
 
         board.highlight(Vec::new());
         println!("{}", board);
-        println!("{}", board.material_score);
+        // println!("{}", board.material_score);
         stdout.flush().expect("couldn't flush stdout");
         enable_raw_mode()?;
 
         if board.current_player() == Color::Black {
-            if let Some(ref s) = solver {
+            if let Some(ref mut s) = solver {
                 println!("Solver is making it's move");
 
                 board = match s.make_move(board) {
@@ -137,7 +138,7 @@ fn unix_repl_impl<S: Solver>(mut board: BasicBoard, solver: Option<S>) -> crosst
         disable_raw_mode()?;
         println!();
 
-        if board.piece_at((sx, sy)).color() != board.current {
+        if board.piece_at((sx, sy)).color() != board.current_player() {
             println!("that's not your piece!");
             continue;
         }
@@ -163,7 +164,7 @@ fn unix_repl_impl<S: Solver>(mut board: BasicBoard, solver: Option<S>) -> crosst
 
         if let Some(mut i) = moves.iter().find(|&cm| cm.from == m.from && cm.to == m.to).copied() {
             if i.extra.is_promotion() {
-                if let Some(e) = do_promotion_input(board.current)? {
+                if let Some(e) = do_promotion_input(board.current_player())? {
 
                     // FIXME: Capturing promotions
                     i.extra = e
@@ -212,18 +213,20 @@ fn do_promotion_input(color: Color) -> crossterm::Result<Option<Extra>> {
     }))
 }
 
-pub fn unix_repl<S: Solver>(mut board: BasicBoard, solver: Option<S>) {
+pub fn unix_repl<B: Board, S: Solver>(mut board: B, solver: Option<S>) {
+    let db = DisplayableBoard::new(board);
+
     match enable_raw_mode() {
         Ok(_) => (),
         Err(_) => {
             println!("Failed to enable raw mode, using fallback");
-            return repl(board, solver);
+            return repl(db, solver);
         }
     }
 
     // let _ = catch_unwind(|| {
 
-    match unix_repl_impl(board, solver) {
+    match unix_repl_impl(db, solver) {
         Ok(_) => (),
         Err(e) => println!("{}", e.to_string())
     };
@@ -236,7 +239,7 @@ pub fn unix_repl<S: Solver>(mut board: BasicBoard, solver: Option<S>) {
 
 }
 
-pub fn repl<S: Solver>(mut board: BasicBoard, solver: Option<S>) {
+pub fn repl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, mut solver: Option<S>) {
     let stdin = std::io::stdin();
 
     loop {
@@ -247,7 +250,7 @@ pub fn repl<S: Solver>(mut board: BasicBoard, solver: Option<S>) {
         std::io::stdout().flush().expect("couldn't flush stdout");
 
         if board.current_player() == Color::Black {
-            if let Some(ref s) = solver {
+            if let Some(ref mut s) = solver {
                 println!("Solver is making it's move");
 
                 board = match s.make_move(board) {
@@ -272,7 +275,7 @@ pub fn repl<S: Solver>(mut board: BasicBoard, solver: Option<S>) {
 
         let moves = board.moves((sx, sy));
 
-        if board.piece_at((sx, sy)).color() != board.current {
+        if board.piece_at((sx, sy)).color() != board.current_player() {
             println!("that's not your piece!");
             continue;
         }
@@ -297,7 +300,7 @@ pub fn repl<S: Solver>(mut board: BasicBoard, solver: Option<S>) {
 
         if let Some(mut i) = moves.iter().find(|&cm| cm.from == m.from && cm.to == m.to).copied() {
             if i.extra.is_promotion() {
-                if let Some(e) = do_promotion_input_fallback(board.current).unwrap() {
+                if let Some(e) = do_promotion_input_fallback(board.current_player()).unwrap() {
 
                     // FIXME: Capturing promotions
                     i.extra = e

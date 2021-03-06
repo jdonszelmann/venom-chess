@@ -13,7 +13,6 @@ use crate::game_engine::piece_moves::{pawn_moves_black, pawn_moves_white, bishop
 pub struct BasicBoard {
     pub board: [[Piece; 8]; 8],
     pub current: Color,
-    pub highlighted: Vec<Location>,
     pub castling_rights : [bool; 4],
     pub en_passant : i8,
     pub material_score : i32,
@@ -34,8 +33,6 @@ impl BasicBoard {
 
         current: White,
 
-        highlighted: Vec::new(),
-
         castling_rights : [true;4],
 
         en_passant: 8,
@@ -47,16 +44,10 @@ impl BasicBoard {
         Self {
             board: [[Empty; 8]; 8],
             current: White,
-            highlighted: Vec::new(),
             castling_rights : [true;4],
             en_passant: 8,
             material_score: 0,
         }
-    }
-
-
-    pub fn highlight(&mut self, locations: Vec<Location>) {
-        self.highlighted = locations;
     }
 }
 
@@ -280,37 +271,3 @@ impl Board for BasicBoard {
     }
 }
 
-impl fmt::Display for BasicBoard {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for y in 0..8 {
-            write!(f, "{} ", y)?;
-
-            for x in 0..8 {
-
-                if (x + y) % 2 == 0{
-                    write!(f, "\x1b[100m")?;
-                } else {
-                    write!(f, "\x1b[45m")?;
-                }
-
-                if self.highlighted.contains(&(x, y).into()) {
-                    write!(f, "\x1b[103m")?;
-                }
-
-                write!(f, "{}", self.piece_at((x, y)))?;
-                write!(f, "\x1b[0m")?;
-
-            }
-            writeln!(f)?;
-        }
-
-        writeln!(f, "   0  1  2  3  4  5  6  7 ")?;
-        if self.current == Color::White {
-            writeln!(f, "current player: White")?;
-        } else {
-            writeln!(f, "current player: Black")?;
-        }
-
-        Ok(())
-    }
-}
