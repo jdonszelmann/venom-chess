@@ -30,7 +30,7 @@ fn main() {
 
     // unix_repl::<_, AlphaBeta>(b, Some(solver));
 
-    let mut rp = RandomPlay::new();
+    let mut rp = AlphaBeta::new(4);
     loop {
         // thread::sleep(Duration::from_millis(1000));
 

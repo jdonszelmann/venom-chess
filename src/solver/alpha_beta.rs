@@ -6,6 +6,7 @@ use crate::game_engine::chess_move::Move;
 use std::fs::read;
 use std::i8;
 use crate::solver::Solver;
+use crate::solver::move_order::order_moves;
 
 pub struct AlphaBeta {
     search_depth: u64
@@ -35,20 +36,19 @@ impl AlphaBeta {
 
         if board.current_player() == White {
             let mut value = std::i32::MIN;
-            for m in board.all_moves() {
-                let new_board = board.transition(m);
-                value = value.max(Self::mini_max_ab(&new_board, depth - 1,a,b));
+            for move_res in order_moves(board.all_moves(),board) {
+                value = value.max(Self::mini_max_ab(&move_res.board, depth - 1,a,b));
                 a = a.max(value);
                 if a>=b{
+
                     break;
                 }
             }
             return value;
         } else {
             let mut value = std::i32::MAX;
-            for m in board.all_moves() {
-                let new_board = board.transition(m);
-                value = value.min(Self::mini_max_ab(&new_board, depth - 1,a,b));
+            for move_res in order_moves(board.all_moves(), board) {
+                value = value.min(Self::mini_max_ab(&move_res.board, depth - 1, a, b));
                 b = b.min(value);
                 if b<=a{
                     break;
@@ -67,30 +67,28 @@ impl Solver for AlphaBeta {
 
         if board.current_player() == White {
             let mut best = std::i32::MIN;
-            for m in board.all_moves() {
-                let new_board = board.transition(m);
-                let score = Self::mini_max_ab(&new_board, self.search_depth, std::i32::MIN, std::i32::MAX);
+            for move_res in order_moves(board.all_moves(), &board) {
+                let score = Self::mini_max_ab(&move_res.board, self.search_depth, std::i32::MIN, std::i32::MAX);
                 if score > best {
                     best = score;
                     best_moves = Vec::new();
-                    best_moves.push(m)
+                    best_moves.push(move_res.mv)
                 } else if score == best {
-                    best_moves.push(m);
+                    best_moves.push(move_res.mv);
                 }
             }
         }
 
         if board.current_player() == Black {
             let mut best = std::i32::MAX;
-            for m in board.all_moves() {
-                let new_board = board.transition(m);
-                let score = Self::mini_max_ab(&new_board, self.search_depth, i32::MIN, i32::MAX);
+            for move_res in order_moves(board.all_moves(), &board) {
+                let score = Self::mini_max_ab(&move_res.board, self.search_depth, i32::MIN, i32::MAX);
                 if score < best {
                     best = score;
                     best_moves = Vec::new();
-                    best_moves.push(m)
+                    best_moves.push(move_res.mv)
                 } else if score == best {
-                    best_moves.push(m);
+                    best_moves.push(move_res.mv);
                 }
             }
         }
