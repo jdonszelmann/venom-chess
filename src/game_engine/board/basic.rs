@@ -206,14 +206,17 @@ impl Board for BasicBoard {
             _ => movable,
         };
 
-        if m.extra.is_promotion() {
-            new_board.material_score -= set_piece.material_worth();
-        }
+
 
         *new_board.piece_at_mut(m.to) = set_piece;
         *new_board.piece_at_mut(m.from)= Piece::Empty;
 
         func(movable, m.from, m.to, replaces);
+
+        if m.extra.is_promotion() {
+            new_board.material_score -= set_piece.material_worth();
+            func(set_piece, m.to, m.to, movable);
+        }
 
         new_board.current = self.current.other();
 

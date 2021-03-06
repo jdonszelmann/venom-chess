@@ -34,7 +34,7 @@ impl AlphaBetaTransp {
         }
     }
 
-    pub fn mini_max_ab<B: Board>(&mut self, board: B, depth: u64, mut a: i32, mut b: i32, table: &mut HashMap<B, Entry>) -> i32 {
+    fn mini_max_ab<B: Board>(&mut self, board: B, depth: u64, mut a: i32, mut b: i32, table: &mut HashMap<B, Entry>) -> i32 {
         if depth == 0 || board.is_terminal().is_some() {
             let terminal = board.is_terminal();
             if terminal.is_some() {
