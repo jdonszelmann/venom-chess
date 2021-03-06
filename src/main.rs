@@ -1,4 +1,4 @@
-use crate::game_engine::board::{BasicBoard, Board};
+use crate::game_engine::board::BasicBoard;
 use crate::ui::unix_repl;
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
@@ -25,7 +25,7 @@ fn main() {
 
     let solver = Minimax::new();
 
-    unix_repl::<Minimax>(b, Some(solver));
+    unix_repl::<_, Minimax>(b, Some(solver));
 
     // let rp = Minimax::new();
     // loop {

@@ -2,10 +2,6 @@ use crate::game_engine::board::Board;
 use crate::game_engine::chess_move::{Move, Location};
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
-use std::hash::{Hash, Hasher};
-use rand::rngs::StdRng;
-use rand::{SeedableRng, RngCore, Rng};
-use lazy_static::lazy_static;
 use std::fmt;
 
 
