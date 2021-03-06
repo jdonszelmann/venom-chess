@@ -205,4 +205,8 @@ impl<B> Board for PSTBoard<B> where B: Board {
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece {
         self.inner.piece_at_mut(l)
     }
+
+    fn hash(&self) -> u64 {
+        self.inner.hash()
+    }
 }

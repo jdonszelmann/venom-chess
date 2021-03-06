@@ -8,8 +8,10 @@ use std::fmt;
 use crate::game_engine::board::Board;
 use crate::game_engine::king_check::king_check;
 use crate::game_engine::piece_moves::{pawn_moves_black, pawn_moves_white, bishop_moves, knight_moves, rook_moves, king_moves, queen_moves};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hasher, Hash};
 
-#[derive(Clone, Eq, PartialEq, Debug, Hash)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub struct BasicBoard {
     pub board: [[Piece; 8]; 8],
     pub current: Color,
@@ -17,6 +19,7 @@ pub struct BasicBoard {
     pub en_passant : i8,
     pub material_score : i32,
 }
+
 
 impl BasicBoard {
     pub const DEFAULT_BOARD: BasicBoard = BasicBoard {
@@ -268,6 +271,15 @@ impl Board for BasicBoard {
 
     fn get_material_score(&self) -> i32 {
         self.material_score
+    }
+
+    fn hash(&self) -> u64 {
+        let mut s = DefaultHasher::new();
+        self.board.hash(&mut s);
+        self.en_passant.hash(&mut s);
+        self.current.hash(&mut s);
+        self.castling_rights.hash(&mut s);
+        s.finish()
     }
 }
 

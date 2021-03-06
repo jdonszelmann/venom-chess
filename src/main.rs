@@ -8,12 +8,12 @@ use std::time::Duration;
 use crate::solver::alpha_beta::AlphaBeta;
 use crate::solver::Solver;
 use crate::game_engine::board::pst::PSTBoard;
+use crate::solver::alpha_beta_transp::AlphaBetaTransp;
 
 mod game_engine;
 mod solver;
 mod ui;
-
-
+mod transposition_table;
 
 
 fn main() {
@@ -24,9 +24,10 @@ fn main() {
     // *b.piece_at_mut((7, 7)) = Piece::BlackKing;
     // b.current = Color::White;
 
-    let solver = AlphaBeta::new(4);
+    let white_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
+    let black_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
 
-    unix_repl::<_, AlphaBeta>(b, Some(solver));
+    unix_repl::<_, _, _>(b, Some(black_solver), Some(white_solver));
 
     // let rp = AlphaBeta::new();
     // loop {

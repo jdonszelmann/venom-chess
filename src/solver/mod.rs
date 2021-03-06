@@ -7,4 +7,6 @@ pub mod alpha_beta_transp;
 
 pub trait Solver {
     fn make_move<B: Board>(&mut self, board: B) -> Option<B>;
+
+    fn stats(&self) -> String;
 }

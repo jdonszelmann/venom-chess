@@ -7,11 +7,19 @@ use std::fs::read;
 use std::i8;
 use crate::solver::Solver;
 use std::collections::HashMap;
-use std::hash::Hash;
+use std::hash::{Hash, Hasher};
+use std::collections::hash_map::DefaultHasher;
+use crate::transposition_table::TranspositionTable;
+
 
 pub struct AlphaBetaTransp {
     search_depth: u64,
     table_hits: u64,
+    explored: u64,
+
+    transposition_table: TranspositionTable<Entry>,
+
+    last_best: i32,
 }
 
 enum EntryType {
@@ -27,30 +35,23 @@ struct Entry {
 }
 
 impl AlphaBetaTransp {
-    pub fn new(search_depth: u64) -> Self {
+    pub fn new(search_depth: u64, transposition_size: u64) -> Self {
         Self {
             search_depth,
             table_hits: 0,
+            explored: 0,
+            transposition_table: TranspositionTable::new(transposition_size),
+            last_best: 0
         }
     }
 
-    pub fn mini_max_ab<B: Board>(&mut self, board: B, depth: u64, mut a: i32, mut b: i32, table: &mut HashMap<B, Entry>) -> i32 {
-        if depth == 0 || board.is_terminal().is_some() {
-            let terminal = board.is_terminal();
-            if terminal.is_some() {
-                return if terminal == Some(Black) {
-                    std::i32::MIN
-                } else if terminal == Some(White) {
-                    std::i32::MAX
-                } else {
-                    0
-                };
-            }
-            return board.get_material_score();
-        }
+    pub fn mini_max_ab<B: Board>(&mut self, board: B, depth: u64, mut a: i32, mut b: i32) -> i32 {
+        self.explored += 1;
+
+        let board_hash = board.hash();
 
         // Transposition table match
-        if let Some(entry) = table.get(&board) {
+        if let Some(entry) = self.transposition_table.get(board_hash) {
             if entry.depth >= depth {
                 self.table_hits += 1;
 
@@ -71,63 +72,35 @@ impl AlphaBetaTransp {
             }
         }
 
-        if board.current_player() == White {
-            let mut value = std::i32::MIN;
-            for m in board.all_moves() {
-                let new_board = board.transition(m);
-                value = value.max(self.mini_max_ab(new_board, depth - 1, a, b, table));
-                a = a.max(value);
-                if a >= b {
-                    break;
+        if depth == 0 || board.is_terminal().is_some() {
+            let terminal = board.is_terminal();
+
+            let value = if terminal.is_some() {
+                if terminal == Some(Black) {
+                    std::i32::MIN
+                } else if terminal == Some(White) {
+                    std::i32::MAX
+                } else {
+                    0
                 }
-            }
+            } else {
+                board.get_material_score()
+            };
 
             if value <= a {
-                table.insert(board, Entry {
+                self.transposition_table.insert(board_hash, Entry {
                     depth,
                     value,
                     tp: EntryType::Lower
                 });
             } else if value >= b {
-                table.insert(board, Entry {
+                self.transposition_table.insert(board_hash, Entry {
                     depth,
                     value,
                     tp: EntryType::Upper
                 });
             } else{
-                table.insert(board, Entry {
-                    depth,
-                    value,
-                    tp: EntryType::Exact
-                });
-            }
-
-            return value;
-        } else {
-            let mut value = std::i32::MAX;
-            for m in board.all_moves() {
-                let new_board = board.transition(m);
-                value = value.min(self.mini_max_ab(new_board, depth - 1, a, b, table));
-                b = b.min(value);
-                if b <= a {
-                    break;
-                }
-            }
-
-            if value <= a {
-                table.insert(board, Entry {
-                    depth,
-                    value,
-                    tp: EntryType::Lower
-                });
-            } else if value >= b {
-                table.insert(board, Entry {
-                    depth,
-                    value,
-                    tp: EntryType::Upper
-                });
-            } else{
-                table.insert(board, Entry {
+                self.transposition_table.insert(board_hash, Entry {
                     depth,
                     value,
                     tp: EntryType::Exact
@@ -136,6 +109,53 @@ impl AlphaBetaTransp {
 
             return value;
         }
+
+
+        let mut value;
+        if board.current_player() == White {
+            value = std::i32::MIN;
+            for m in board.all_moves() {
+                let new_board = board.transition(m);
+                value = value.max(self.mini_max_ab(new_board, depth - 1, a, b));
+                a = a.max(value);
+                if a >= b {
+                    break;
+                }
+            }
+
+        } else {
+            value = std::i32::MAX;
+            for m in board.all_moves() {
+                let new_board = board.transition(m);
+                value = value.min(self.mini_max_ab(new_board, depth - 1, a, b));
+                b = b.min(value);
+                if b <= a {
+                    break;
+                }
+            }
+        }
+
+        if value <= a {
+            self.transposition_table.insert(board_hash, Entry {
+                depth,
+                value,
+                tp: EntryType::Lower
+            });
+        } else if value >= b {
+            self.transposition_table.insert(board_hash, Entry {
+                depth,
+                value,
+                tp: EntryType::Upper
+            });
+        } else{
+            self.transposition_table.insert(board_hash, Entry {
+                depth,
+                value,
+                tp: EntryType::Exact
+            });
+        }
+
+        return value
     }
 }
 
@@ -143,16 +163,17 @@ impl Solver for AlphaBetaTransp {
     fn make_move<B: Board>(&mut self, board: B) -> Option<B> {
         let mut rng = thread_rng();
 
-        let mut transposition_table = HashMap::<B, Entry>::new();
-
+        self.table_hits = 0;
+        self.explored = 0;
 
         let mut best_moves = Vec::new();
 
+        let mut best = 0;
         if board.current_player() == White {
-            let mut best = std::i32::MIN;
+            best = i32::MIN;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
-                let score = self.mini_max_ab(new_board, self.search_depth, std::i32::MIN, std::i32::MAX, &mut transposition_table);
+                let score = self.mini_max_ab(new_board, self.search_depth, std::i32::MIN, std::i32::MAX);
                 if score > best {
                     best = score;
                     best_moves = Vec::new();
@@ -164,10 +185,10 @@ impl Solver for AlphaBetaTransp {
         }
 
         if board.current_player() == Black {
-            let mut best = std::i32::MAX;
+            best = i32::MAX;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
-                let score = self.mini_max_ab(new_board, self.search_depth, i32::MIN, i32::MAX, &mut transposition_table);
+                let score = self.mini_max_ab(new_board, self.search_depth, i32::MIN, i32::MAX);
                 if score < best {
                     best = score;
                     best_moves = Vec::new();
@@ -178,8 +199,15 @@ impl Solver for AlphaBetaTransp {
             }
         }
 
+
+        self.last_best = best;
+
         let m = best_moves.into_iter().choose(&mut rng)?;
 
         Some(board.transition(m))
+    }
+
+    fn stats(&self) -> String {
+        format!("tp hits: {:.3}% explored: {} evaluation: {}, tu: {}, tc: {}", self.table_hits as f64 / self.explored as f64, self.explored, self.last_best, self.transposition_table.used, self.transposition_table.collisions)
     }
 }
