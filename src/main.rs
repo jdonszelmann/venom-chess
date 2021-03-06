@@ -5,7 +5,8 @@ use crate::game_engine::color::Color;
 use crate::solver::minimax::Minimax;
 use std::thread;
 use std::time::Duration;
-use crate::ai::alpha_beta::AlphaBeta;
+use crate::solver::alpha_beta::AlphaBeta;
+use crate::solver::Solver;
 
 mod game_engine;
 mod solver;
