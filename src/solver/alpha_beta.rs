@@ -5,52 +5,13 @@ use crate::game_engine::color::Color::{White, Black};
 use crate::game_engine::chess_move::Move;
 use std::fs::read;
 use std::i8;
+use crate::solver::Solver;
 
 pub struct AlphaBeta {}
 
 impl AlphaBeta {
     pub fn new() -> Self {
         Self {}
-    }
-
-    pub fn make_move<B: Board>(&self, board: B) -> Option<B> {
-        let mut rng = thread_rng();
-
-        let mut best_moves = Vec::new();
-
-        if board.current_player() == White {
-            let mut best = -std::i8::MAX;
-            for m in board.all_moves() {
-                let new_board = board.transition(m);
-                let score = AlphaBeta::mini_max_ab(&new_board, 4, i8::MIN, i8::MAX);
-                if score > best {
-                    best = score;
-                    best_moves = Vec::new();
-                    best_moves.push(m)
-                } else if score == best {
-                    best_moves.push(m);
-                }
-            }
-        }
-
-        if board.current_player() == Black {
-            let mut best = std::i8::MAX;
-            for m in board.all_moves() {
-                let new_board = board.transition(m);
-                let score = AlphaBeta::mini_max_ab(&new_board, 4, i8::MIN, i8::MAX);
-                if score < best {
-                    best = score;
-                    best_moves = Vec::new();
-                    best_moves.push(m)
-                } else if score == best {
-                    best_moves.push(m);
-                }
-            }
-        }
-
-        let m = best_moves.into_iter().choose(&mut rng)?;
-
-        Some(board.transition(m))
     }
 
     pub fn mini_max_ab(board: &impl Board, depth: i64, mut a: i8, mut b: i8) -> i8 {
@@ -91,5 +52,48 @@ impl AlphaBeta {
             }
             return value;
         }
+    }
+}
+
+impl Solver for AlphaBeta {
+
+    pub fn make_move<B: Board>(&self, board: B) -> Option<B> {
+        let mut rng = thread_rng();
+
+        let mut best_moves = Vec::new();
+
+        if board.current_player() == White {
+            let mut best = -std::i8::MAX;
+            for m in board.all_moves() {
+                let new_board = board.transition(m);
+                let score = AlphaBeta::mini_max_ab(&new_board, 4, i8::MIN, i8::MAX);
+                if score > best {
+                    best = score;
+                    best_moves = Vec::new();
+                    best_moves.push(m)
+                } else if score == best {
+                    best_moves.push(m);
+                }
+            }
+        }
+
+        if board.current_player() == Black {
+            let mut best = std::i8::MAX;
+            for m in board.all_moves() {
+                let new_board = board.transition(m);
+                let score = AlphaBeta::mini_max_ab(&new_board, 4, i8::MIN, i8::MAX);
+                if score < best {
+                    best = score;
+                    best_moves = Vec::new();
+                    best_moves.push(m)
+                } else if score == best {
+                    best_moves.push(m);
+                }
+            }
+        }
+
+        let m = best_moves.into_iter().choose(&mut rng)?;
+
+        Some(board.transition(m))
     }
 }

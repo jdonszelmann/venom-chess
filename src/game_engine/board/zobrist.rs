@@ -196,7 +196,7 @@ impl<B> Board for ZobristBoard<B> where B: Board {
         self.inner.get_en_passant()
     }
 
-    fn get_material_score(&self) -> i8 {
+    fn get_material_score(&self) -> i32 {
         self.inner.get_material_score()
     }
 

@@ -85,21 +85,21 @@ impl Piece {
         }
     }
 
-    pub fn material_worth(&self) -> i8{
+    pub fn material_worth(&self) -> i32{
         match self{
             Piece::Empty => 0,
-            Piece::BlackPawn => 1,
-            Piece::WhitePawn => -1,
-            Piece::BlackBishop => 3,
-            Piece::WhiteBishop => -3,
-            Piece::BlackKnight => 3,
-            Piece::WhiteKnight => -3,
-            Piece::BlackRook => 5,
-            Piece::WhiteRook => -5,
-            Piece::BlackKing => 0,
-            Piece::WhiteKing => -0,
-            Piece::BlackQueen => 9,
-            Piece::WhiteQueen => -9,
+            Piece::BlackPawn => 100,
+            Piece::WhitePawn => -100,
+            Piece::BlackBishop => 330,
+            Piece::WhiteBishop => -330,
+            Piece::BlackKnight => 320,
+            Piece::WhiteKnight => -320,
+            Piece::BlackRook => 500,
+            Piece::WhiteRook => -500,
+            Piece::BlackKing => 20000,
+            Piece::WhiteKing => -20000,
+            Piece::BlackQueen => 900,
+            Piece::WhiteQueen => -900,
         }
     }
 }

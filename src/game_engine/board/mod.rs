@@ -27,7 +27,7 @@ pub trait Board: Sized + Clone + fmt::Display{
 
     fn get_castling_rights(&self) -> [bool; 4];
     fn get_en_passant(&self) -> i8;
-    fn get_material_score(&self) -> i8;
+    fn get_material_score(&self) -> i32;
     fn piece_at(&self, l: impl Into<Location>) -> Piece;
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece;
 }
