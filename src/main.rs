@@ -29,7 +29,8 @@ fn main() {
     let white_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
     let black_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
 
-    unix_repl::<_, _, _>(b, Some(black_solver), Some(white_solver));
+    // unix_repl::<_, _, AlphaBetaTransp>(b, Some(black_solver), None);
+    unix_repl::<_, _, AlphaBetaTransp>(b, Some(black_solver), Some(white_solver));
 
     // let rp = AlphaBeta::new();
     // loop {
