@@ -44,8 +44,8 @@ impl<B: Board> fmt::Display for DisplayableBoard<B> {
                 if let Some(lc) = self.last_from {
                     if x == lc.x && y == lc.y {
                         stdout().queue(SetBackgroundColor(Rgb {
-                            r: 204,
-                            g: 204,
+                            r: 153,
+                            g: 153,
                             b: 0,
                         })).map_err(|_| fmt::Error::default())?;
                     }
@@ -54,8 +54,8 @@ impl<B: Board> fmt::Display for DisplayableBoard<B> {
                 if let Some(lc) = self.last_to {
                     if x == lc.x && y == lc.y {
                         stdout().queue(SetBackgroundColor(Rgb {
-                            r: 204,
-                            g: 204,
+                            r: 153,
+                            g: 153,
                             b: 0,
                         })).map_err(|_| fmt::Error::default())?;
                     }
