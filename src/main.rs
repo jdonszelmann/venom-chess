@@ -24,7 +24,7 @@ fn main() {
     // *b.piece_at_mut((4, 1)) = Piece::BlackKing;
     // b.current = Color::Black;
 
-    let solver = AlphaBeta::new();
+    let solver = AlphaBeta::new(4);
 
     unix_repl::<_, AlphaBeta>(b, Some(solver));
 

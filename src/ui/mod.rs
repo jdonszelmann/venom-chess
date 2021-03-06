@@ -81,7 +81,7 @@ fn get_mouse_input() -> Result<(i8, i8), ErrorKind> {
     }
 }
 
-fn unix_repl_impl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, solver: Option<S>) -> crossterm::Result<()> {
+fn unix_repl_impl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, mut solver: Option<S>) -> crossterm::Result<()> {
     let mut stdout = std::io::stdout();
     stdout.flush()?;
     disable_raw_mode()?;
@@ -104,7 +104,7 @@ fn unix_repl_impl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, solver: O
         enable_raw_mode()?;
 
         if board.current_player() == Color::Black {
-            if let Some(ref s) = solver {
+            if let Some(ref mut s) = solver {
                 println!("Solver is making it's move");
 
                 board = match s.make_move(board) {
@@ -239,7 +239,7 @@ pub fn unix_repl<B: Board, S: Solver>(mut board: B, solver: Option<S>) {
 
 }
 
-pub fn repl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, solver: Option<S>) {
+pub fn repl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, mut solver: Option<S>) {
     let stdin = std::io::stdin();
 
     loop {
@@ -250,7 +250,7 @@ pub fn repl<B: Board, S: Solver>(mut board: DisplayableBoard<B>, solver: Option<
         std::io::stdout().flush().expect("couldn't flush stdout");
 
         if board.current_player() == Color::Black {
-            if let Some(ref s) = solver {
+            if let Some(ref mut s) = solver {
                 println!("Solver is making it's move");
 
                 board = match s.make_move(board) {

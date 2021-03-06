@@ -5,9 +5,9 @@ use crate::game_engine::color::Color;
 use std::fmt;
 
 
-#[derive(Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub struct DisplayableBoard<B> {
-    inner: B,
+    pub inner: B,
     highlighted: Vec<Location>,
 }
 
@@ -73,7 +73,7 @@ impl<B> Board for DisplayableBoard<B> where B: Board {
     }
 
     #[inline]
-    fn transition_with_move_func(&self, m: Move, mut func: impl FnMut(Piece, Location, Location, Piece)) -> Self {
+    fn transition_with_move_func(&self, m: Move, func: impl FnMut(Piece, Location, Location, Piece)) -> Self {
         Self {
             inner: self.inner.transition_with_move_func(m, func),
             highlighted: self.highlighted.clone()

@@ -13,7 +13,7 @@ impl RandomPlay {
 }
 
 impl Solver for RandomPlay {
-    fn make_move<B: Board>(&self, board: B) -> Option<B> {
+    fn make_move<B: Board>(&mut self, board: B) -> Option<B> {
         let mut rng = thread_rng();
 
         let m = board.all_moves().into_iter().choose(&mut rng)?;
