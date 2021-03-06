@@ -5,6 +5,7 @@ use crate::game_engine::color::Color;
 use crate::ai::minimax::Minimax;
 use std::thread;
 use std::time::Duration;
+use crate::ai::alpha_beta::AlphaBeta;
 
 mod game_engine;
 mod ai;
@@ -23,7 +24,7 @@ fn main() {
 
     // unix_repl(b);
 
-    let rp = Minimax::new();
+    let rp = AlphaBeta::new();
     loop {
         // thread::sleep(Duration::from_millis(1000));
 
