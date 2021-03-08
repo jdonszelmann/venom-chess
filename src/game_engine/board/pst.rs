@@ -154,7 +154,8 @@ impl<B> Board for PSTBoard<B> where B: Board {
     }
 
     fn transition_with_move_func(&self, m: Move, mut remove_piece: impl FnMut(Piece, Location), mut add_piece: impl FnMut(Piece, Location)) -> Self {
-        let mut hv = self.heuristic_value;
+        let mut hv1 = 0;
+        let mut hv2 = 0;
 
 
         let inner = self.inner.transition_with_move_func(m, |p, l| {
@@ -166,17 +167,22 @@ impl<B> Board for PSTBoard<B> where B: Board {
             // hv += pos_score(p, t);
             // hv -= pos_score(r, t);
 
+            hv1 += p.material_worth();
+            hv1 -= pos_score(p,l);
+
             remove_piece(p, l);
         }, |p, l| {
 
+            hv2 -= p.material_worth();
+            hv2 += pos_score(p,l);
 
-            add_piece(p, l);
+
         });
 
 
         Self {
             inner,
-            heuristic_value: hv,
+            heuristic_value: self.heuristic_value+hv1+hv2,
         }
     }
 
@@ -235,8 +241,8 @@ mod tests {
 
 
     #[test]
-    fn test_hash_fuzzer() {
-        for _ in 0..100 {
+    fn test_heuristic_fuzzer() {
+        for _ in 0..1000 {
             let mut board = BasicBoard::DEFAULT_BOARD;
             let mut pst_board = PSTBoard::new(DisplayableBoard::new(board));
             let mut random_player = RandomPlay::new();
@@ -250,10 +256,8 @@ mod tests {
 
             let pst_board_2 = PSTBoard::new(pst_board.inner.clone());
 
-            println!("{}", pst_board_2);
-            println!("{}", pst_board);
-
-
+            // println!("{}", pst_board_2);
+            // println!("{}", pst_board);
             assert_eq!(pst_board.heuristic_value, pst_board_2.heuristic_value);
         }
     }

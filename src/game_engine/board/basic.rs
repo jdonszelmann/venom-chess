@@ -10,6 +10,7 @@ use crate::game_engine::king_check::king_check;
 use crate::game_engine::piece_moves::{pawn_moves_black, pawn_moves_white, bishop_moves, knight_moves, rook_moves, king_moves, queen_moves};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hasher, Hash};
+use crate::game_engine::chess_move::Extra::{KingCastle, QueenCastle};
 
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct BasicBoard {
@@ -148,7 +149,7 @@ impl Board for BasicBoard {
         }
 
         if movable == BlackKing {
-            if m == ((4,0),(2,0)).into(){
+            if m == ((4,0),(2,0),QueenCastle).into(){
                 *new_board.piece_at_mut((3,0)) = Piece::BlackRook;
                 *new_board.piece_at_mut((0,0))= Piece::Empty;
 
@@ -156,7 +157,7 @@ impl Board for BasicBoard {
                 add_piece(Piece::BlackRook, (3, 0).into());
             }
 
-            if m == ((4,0),(6,0)).into(){
+            if m == ((4,0),(6,0),KingCastle).into(){
                 *new_board.piece_at_mut((5,0)) = Piece::BlackRook;
                 *new_board.piece_at_mut((7,0))= Piece::Empty;
 
@@ -188,7 +189,7 @@ impl Board for BasicBoard {
         }
 
         if movable == WhiteKing {
-            if m == ((4,7),(2,7)).into(){
+            if m == ((4,7),(2,7),QueenCastle).into(){
                 *new_board.piece_at_mut((3,7)) = Piece::WhiteRook;
                 *new_board.piece_at_mut((0,7))= Piece::Empty;
 
@@ -196,7 +197,7 @@ impl Board for BasicBoard {
                 add_piece(Piece::WhiteRook, (3, 7).into());
             }
 
-            if m == ((4,7),(6,7)).into(){
+            if m == ((4,7),(6,7),KingCastle).into(){
                 *new_board.piece_at_mut((5,7)) = Piece::WhiteRook;
                 *new_board.piece_at_mut((7,7))= Piece::Empty;
 

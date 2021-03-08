@@ -47,6 +47,19 @@ pub enum Extra {
 }
 
 impl Extra {
+
+    pub fn is_capturing(&self) -> bool {
+        match self {
+            Extra::Captures => true,
+            Extra::EnPassantCaptures => true,
+            Extra::KnightPromotionCapture => true,
+            Extra::BishopPromotion => true,
+            Extra::RookPromotionCapture => true,
+            Extra::QueenPromotionCapture => true,
+            _ => false,
+        }
+    }
+
     pub fn is_promotion(&self) -> bool {
         self.is_capturing_promotion() || self.is_non_capturing_promotion()
     }
