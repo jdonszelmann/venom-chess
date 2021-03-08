@@ -168,6 +168,8 @@ impl<B> Board for PSTBoard<B> where B: Board {
 
             remove_piece(p, l);
         }, |p, l| {
+
+
             add_piece(p, l);
         });
 
