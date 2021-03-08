@@ -11,6 +11,7 @@ use crate::game_engine::board::pst::PSTBoard;
 use crate::solver::alpha_beta_transp::AlphaBetaTransp;
 use crate::game_engine::board::display::DisplayableBoard;
 use crate::solver::random_play::RandomPlay;
+use crate::solver::quiescence::Quiescence;
 
 mod game_engine;
 mod solver;
@@ -26,11 +27,11 @@ fn main() {
     // *b.piece_at_mut((7, 7)) = Piece::BlackKing;
     // b.current = Color::White;
 
-    // let white_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
-    let black_solver = AlphaBetaTransp::new(5, 1024 * 1024 * 8);
+    let white_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
+    let black_solver = Quiescence::new(4);
 
     // unix_repl::<_, _, _>(b, Some(black_solver), Some(white_solver));
-    unix_repl::<_, AlphaBetaTransp, AlphaBetaTransp>(b, None, None);
+    unix_repl::<_, AlphaBetaTransp, _>(b, None, Some(black_solver));
 
     // let rp = AlphaBeta::new();
     // loop {

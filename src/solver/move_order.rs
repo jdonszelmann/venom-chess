@@ -2,6 +2,7 @@ use crate::game_engine::chess_move::Move;
 use crate::game_engine::board::Board;
 use crate::game_engine::color::Color;
 
+#[derive(Debug)]
 pub struct MoveRes<B>{
     pub board: B,
     pub mv: Move,
