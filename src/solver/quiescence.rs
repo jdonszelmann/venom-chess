@@ -5,33 +5,27 @@ use crate::game_engine::color::Color::{White, Black};
 use crate::game_engine::chess_move::Move;
 use crate::solver::Solver;
 use crate::solver::move_order::order_moves;
-use crate::stats::StatsEntry;
+use crate::stats::{StatsEntry, Stats};
+use crate::game_engine::board::display::DisplayableBoard;
 
 pub struct Quiescence {
     search_depth: u64,
-    cur_eval: i32,
-    deep_eval: i32,
-    normal_nodes: i32,
-    deep_nodes: i32,
 }
 
 impl Quiescence {
     pub fn new(search_depth: u64) -> Self {
         Self {
             search_depth,
-            cur_eval: 0,
-            deep_eval: 0,
-            normal_nodes: 0,
-            deep_nodes: 0,
         }
     }
 
-    pub fn mini_max_ab(&mut self, board: &impl Board, depth: u64, mut a: i32, mut b: i32) -> i32 {
-        self.normal_nodes += 1;
+    pub fn mini_max_ab(&mut self, board: &impl Board, depth: u64, mut a: i32, mut b: i32, stats: &mut StatsEntry) -> i32 {
+        stats.seen_state();
 
         if depth == 0 {
             // return board.get_material_score();
-            return Self::quiescense(self, board, a, b);
+            stats.custom_int_entry_sub("deep_nodes");
+            return Self::quiescense(self, board, a, b, stats);
         }
 
         if board.is_terminal().is_some() {
@@ -52,7 +46,7 @@ impl Quiescence {
             let mut value = std::i32::MIN;
             for move_res in order_moves(board.all_moves(), board){
                 // println!("{}",depth);
-                value = value.max(Self::mini_max_ab(self, &move_res.board, depth - 1, a, b));
+                value = value.max(Self::mini_max_ab(self, &move_res.board, depth - 1, a, b, stats));
                 a = a.max(value);
                 if a >= b {
                     break;
@@ -62,7 +56,7 @@ impl Quiescence {
         } else {
             let mut value = std::i32::MAX;
             for move_res in order_moves(board.all_moves(), board) {
-                value = value.min(Self::mini_max_ab(self, &move_res.board, depth - 1, a, b));
+                value = value.min(Self::mini_max_ab(self, &move_res.board, depth - 1, a, b, stats));
                 b = b.min(value);
                 if b <= a {
                     break;
@@ -72,12 +66,10 @@ impl Quiescence {
         }
     }
 
-    pub fn quiescense(&mut self, board: &impl Board, mut a: i32, mut b: i32) -> i32 {
-        self.deep_nodes += 1;
+    pub fn quiescense(&mut self, board: &impl Board, mut a: i32, mut b: i32, stats: &mut StatsEntry) -> i32 {
+        stats.custom_int_entry_add("deep_nodes");
 
         let cur_score = board.get_material_score();
-
-        // println!("{},{},{}",a,b,cur_score);
 
         if board.current_player() == White {
             if cur_score >= b {
@@ -117,7 +109,7 @@ impl Quiescence {
                 return cur_score;
             }
             for move_res in order_moves(moves, board) {
-                value = value.max(Self::quiescense(self, &move_res.board, a, b));
+                value = value.max(Self::quiescense(self, &move_res.board, a, b, stats));
                 a = a.max(value);
                 if a >= b {
                     break;
@@ -131,7 +123,7 @@ impl Quiescence {
                 return cur_score;
             }
             for move_res in order_moves(moves, board) {
-                value = value.min(Self::quiescense(self, &move_res.board, a, b));
+                value = value.min(Self::quiescense(self, &move_res.board, a, b, stats));
                 b = b.min(value);
                 if b <= a {
                     break;
@@ -143,10 +135,7 @@ impl Quiescence {
 }
 
 impl Solver for Quiescence {
-    fn make_move_impl<B: Board>(&mut self, board: B, _stats: &mut StatsEntry) -> Option<B> {
-        self.normal_nodes = 0;
-        self.deep_nodes = 0;
-
+    fn make_move_impl<B: Board>(&mut self, board: DisplayableBoard<B>, stats: &mut StatsEntry) -> Option<DisplayableBoard<B>> {
         let mut rng = thread_rng();
 
         let mut best_moves = Vec::new();
@@ -156,7 +145,7 @@ impl Solver for Quiescence {
         if board.current_player() == White {
             best = std::i32::MIN;
             for move_res in order_moves(board.all_moves(), &board) {
-                let score = Self::mini_max_ab(self, &move_res.board, self.search_depth, std::i32::MIN, std::i32::MAX);
+                let score = Self::mini_max_ab(self, &move_res.board, self.search_depth, std::i32::MIN, std::i32::MAX, stats);
                 if score > best {
                     best = score;
                     best_moves = Vec::new();
@@ -170,7 +159,7 @@ impl Solver for Quiescence {
         if board.current_player() == Black {
             best = std::i32::MAX;
             for move_res in order_moves(board.all_moves(), &board) {
-                let score = Self::mini_max_ab(self, &move_res.board, self.search_depth, i32::MIN, i32::MAX);
+                let score = Self::mini_max_ab(self, &move_res.board, self.search_depth, i32::MIN, i32::MAX, stats);
                 if score < best {
                     best = score;
                     best_moves = Vec::new();
@@ -184,12 +173,13 @@ impl Solver for Quiescence {
         let m = best_moves.into_iter().choose(&mut rng)?;
 
         let new_state = board.transition(m);
-        self.deep_eval = best;
-        self.cur_eval = new_state.get_material_score();
+        stats.evaluation(best as i64);
+        stats.custom_int_entry("current_evaluation", new_state.get_material_score() as i64);
+
         Some(new_state)
     }
-    //
-    // fn stats(&self) -> String {
-    //     format!("EVAL: {}, {}. EXP: {}, {}.", self.cur_eval, self.deep_eval, self.normal_nodes, self.deep_nodes-self.normal_nodes)
-    // }
+
+    fn init_stats(&self, stats_folder: String) -> Stats {
+        Stats::new("Quiescence search", Some(self.search_depth), None, stats_folder, true)
+    }
 }

@@ -4,7 +4,8 @@ use rand::thread_rng;
 use crate::game_engine::color::Color::{White, Black};
 use crate::solver::Solver;
 use crate::solver::move_order::order_moves;
-use crate::stats::StatsEntry;
+use crate::stats::{StatsEntry, Stats};
+use crate::game_engine::board::display::DisplayableBoard;
 
 pub struct AlphaBeta {
     search_depth: u64
@@ -17,7 +18,9 @@ impl AlphaBeta {
         }
     }
 
-    pub fn mini_max_ab(board: &impl Board, depth: u64, mut a: i32, mut b: i32) -> i32 {
+    pub fn mini_max_ab(board: &impl Board, depth: u64, mut a: i32, mut b: i32, stats: &mut StatsEntry) -> i32 {
+        stats.seen_state();
+
         if depth == 0 || board.is_terminal().is_some() {
             let terminal = board.is_terminal();
             if terminal.is_some() {
@@ -34,11 +37,11 @@ impl AlphaBeta {
 
         if board.current_player() == White {
             let mut value = std::i32::MIN;
-            for move_res in order_moves(board.all_moves(),board) {
-                value = value.max(Self::mini_max_ab(&move_res.board, depth - 1,a,b));
-                a = a.max(value);
-                if a>=b{
+            for move_res in order_moves(board.all_moves(), board) {
 
+                value = value.max(Self::mini_max_ab(&move_res.board, depth - 1, a, b, stats));
+                a = a.max(value);
+                if a >= b {
                     break;
                 }
             }
@@ -46,9 +49,10 @@ impl AlphaBeta {
         } else {
             let mut value = std::i32::MAX;
             for move_res in order_moves(board.all_moves(), board) {
-                value = value.min(Self::mini_max_ab(&move_res.board, depth - 1, a, b));
+
+                value = value.min(Self::mini_max_ab(&move_res.board, depth - 1, a, b, stats));
                 b = b.min(value);
-                if b<=a{
+                if b <= a {
                     break;
                 }
             }
@@ -58,7 +62,7 @@ impl AlphaBeta {
 }
 
 impl Solver for AlphaBeta {
-    fn make_move_impl<B: Board>(&mut self, board: B, _stats: &mut StatsEntry) -> Option<B> {
+    fn make_move_impl<B: Board>(&mut self, board: DisplayableBoard<B>, stats: &mut StatsEntry) -> Option<DisplayableBoard<B>> {
         let mut rng = thread_rng();
 
         let mut best_moves = Vec::new();
@@ -66,7 +70,7 @@ impl Solver for AlphaBeta {
         if board.current_player() == White {
             let mut best = std::i32::MIN;
             for move_res in order_moves(board.all_moves(), &board) {
-                let score = Self::mini_max_ab(&move_res.board, self.search_depth, std::i32::MIN, std::i32::MAX);
+                let score = Self::mini_max_ab(&move_res.board, self.search_depth, std::i32::MIN, std::i32::MAX, stats);
                 if score > best {
                     best = score;
                     best_moves = Vec::new();
@@ -75,12 +79,14 @@ impl Solver for AlphaBeta {
                     best_moves.push(move_res.mv);
                 }
             }
+
+            stats.evaluation(best as i64);
         }
 
         if board.current_player() == Black {
             let mut best = std::i32::MAX;
             for move_res in order_moves(board.all_moves(), &board) {
-                let score = Self::mini_max_ab(&move_res.board, self.search_depth, i32::MIN, i32::MAX);
+                let score = Self::mini_max_ab(&move_res.board, self.search_depth, i32::MIN, i32::MAX, stats);
                 if score < best {
                     best = score;
                     best_moves = Vec::new();
@@ -89,6 +95,8 @@ impl Solver for AlphaBeta {
                     best_moves.push(move_res.mv);
                 }
             }
+
+            stats.evaluation(best as i64);
         }
 
         let m = best_moves.into_iter().choose(&mut rng)?;
@@ -96,4 +104,7 @@ impl Solver for AlphaBeta {
         Some(board.transition(m))
     }
 
+    fn init_stats(&self, stats_folder: String) -> Stats {
+        Stats::new("Minimax with Alpha-Beta pruning", Some(self.search_depth), None, stats_folder, true)
+    }
 }

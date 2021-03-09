@@ -1,5 +1,5 @@
 use crate::solver::Solver;
-use crate::stats::StatsEntry;
+use crate::stats::{StatsEntry, Stats};
 use crate::game_engine::board::Board;
 use crate::game_engine::chess_move::{Extra, Move};
 use crate::game_engine::board::display::DisplayableBoard;
@@ -21,16 +21,20 @@ impl FallbackPlayer {
 impl Solver for FallbackPlayer {
     const PRINT_OWN_BOARD: bool = true;
 
-    fn make_move_impl<B: Board>(&mut self, board: B, stats: &mut StatsEntry) -> Option<B> {
+    fn make_move_impl<B: Board>(&mut self, board: DisplayableBoard<B>, stats: &mut StatsEntry) -> Option<DisplayableBoard<B>> {
         let mv = make_move_input(board.clone(), stats)?;
 
         Some(board.transition(mv))
     }
+
+    fn init_stats(&self, stats_folder: String) -> Stats {
+        Stats::new("Human player (Fallback input)", None, None, stats_folder, false)
+    }
 }
 
-pub fn make_move_input<B: Board>(board: B, _stats: &mut StatsEntry) -> Option<Move> {
+pub fn make_move_input<B: Board>(board: DisplayableBoard<B>, _stats: &mut StatsEntry) -> Option<Move> {
     let stdin = std::io::stdin();
-    let mut b = DisplayableBoard::new(board);
+    let mut b = board;
 
     loop {
         let mut buf = String::new();

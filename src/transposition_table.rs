@@ -1,3 +1,4 @@
+use crate::stats::TranspositionTableStats;
 
 pub struct TranspositionTable<T> {
     data: Vec<Option<(T, u64)>>,
@@ -20,13 +21,18 @@ impl<T> TranspositionTable<T> {
         }
     }
 
-    pub fn insert(&mut self, hash: u64, value: T) {
+    pub fn len(&self) -> u64 {
+        self.data.len() as u64
+    }
+
+    pub fn insert(&mut self, hash: u64, value: T, stats: &mut TranspositionTableStats) {
         let len = self.data.len();
         let a = &mut self.data[(hash % len as u64) as usize];
+
         if a.is_some() {
-            self.collisions += 1;
+            stats.collision()
         } else {
-            self.used += 1;
+            stats.colisionless_insert()
         }
         *a = Some((value, hash));
     }
@@ -34,6 +40,7 @@ impl<T> TranspositionTable<T> {
     pub fn get(&self, hash: u64) -> Option<&T> {
         let len = self.data.len();
         let res = self.data[(hash % len as u64) as usize].as_ref();
+
         if let Some((i, found_hash)) = res {
             if *found_hash != hash {
                 return None

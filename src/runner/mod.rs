@@ -14,13 +14,13 @@ pub struct Runner<S1, S2> {
 }
 
 impl<S1: Solver, S2: Solver> Runner<S1, S2> {
-    pub fn new(black_solver: S1, white_solver: S2) -> Self {
+    pub fn new(black_solver: S1, white_solver: S2, stats_folder: String) -> Self {
         Self {
+            black_stats: black_solver.init_stats(stats_folder.clone()),
+            white_stats: white_solver.init_stats(stats_folder),
+
             black_solver,
             white_solver,
-
-            black_stats: Stats::new(),
-            white_stats: Stats::new(),
         }
     }
 
@@ -34,6 +34,8 @@ impl<S1: Solver, S2: Solver> Runner<S1, S2> {
             if db.current_player() == Color::Black {
                 if !S1::PRINT_OWN_BOARD {
                     println!("{}", db);
+                    // println!("black stats: {:?}", self.black_stats.last_entry());
+                    // println!("white stats: {:?}", self.white_stats.last_entry());
                 }
 
                 db = match self.black_solver.make_move(db, self.black_stats.clone()) {
@@ -46,6 +48,8 @@ impl<S1: Solver, S2: Solver> Runner<S1, S2> {
             } else {
                 if !S2::PRINT_OWN_BOARD {
                     println!("{}", db);
+                    // println!("black stats: {:?}", self.black_stats.last_entry());
+                    // println!("white stats: {:?}", self.white_stats.last_entry());
                 }
                 db = match self.white_solver.make_move(db, self.white_stats.clone()) {
                     Some(i) => i,

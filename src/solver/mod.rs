@@ -1,5 +1,6 @@
 use crate::game_engine::board::Board;
 use crate::stats::{Stats, StatsEntry};
+use crate::game_engine::board::display::DisplayableBoard;
 
 pub mod random_play;
 pub mod minimax;
@@ -16,13 +17,16 @@ pub trait Solver {
     /// for printing the board itself, and it must also print the stats object
     const PRINT_OWN_BOARD: bool = false;
 
-    fn make_move<B: Board>(&mut self, board: B, stats: Stats) -> Option<B> {
+    fn make_move<B: Board>(&mut self, board: DisplayableBoard<B>, stats: Stats) -> Option<DisplayableBoard<B>> {
         let mut entry = stats.new_entry();
         let res = self.make_move_impl(board, &mut entry);
         stats.finish_entry(entry);
         res
     }
 
-    fn make_move_impl<B: Board>(&mut self, board: B, stats: &mut StatsEntry) -> Option<B>;
+    fn make_move_impl<B: Board>(&mut self, board: DisplayableBoard<B>, stats: &mut StatsEntry) -> Option<DisplayableBoard<B>>;
+
+
+    fn init_stats(&self, stats_folder: String) -> Stats;
 }
 

@@ -5,17 +5,13 @@ use crate::game_engine::color::Color::{White, Black};
 use crate::solver::Solver;
 use crate::transposition_table::TranspositionTable;
 use crate::solver::move_order::order_moves;
-use crate::stats::StatsEntry;
+use crate::stats::{StatsEntry, Stats};
+use crate::game_engine::board::display::DisplayableBoard;
 
 
 pub struct AlphaBetaTransp {
     search_depth: u64,
-    table_hits: u64,
-    explored: u64,
-
     transposition_table: TranspositionTable<Entry>,
-
-    last_best: i32,
 }
 
 enum EntryType {
@@ -34,22 +30,19 @@ impl AlphaBetaTransp {
     pub fn new(search_depth: u64, transposition_size: u64) -> Self {
         Self {
             search_depth,
-            table_hits: 0,
-            explored: 0,
             transposition_table: TranspositionTable::new(transposition_size),
-            last_best: 0
         }
     }
 
-    pub fn mini_max_ab<B: Board>(&mut self, board: B, depth: u64, mut a: i32, mut b: i32) -> i32 {
-        self.explored += 1;
+    pub fn mini_max_ab<B: Board>(&mut self, board: B, depth: u64, mut a: i32, mut b: i32, stats: &mut StatsEntry) -> i32 {
+        stats.seen_state();
 
         let board_hash = board.hash();
 
         // Transposition table match
         if let Some(entry) = self.transposition_table.get(board_hash) {
             if entry.depth >= depth {
-                self.table_hits += 1;
+                stats.transposition().hit();
 
                 match entry.tp {
                     EntryType::Exact => return entry.value,
@@ -88,19 +81,19 @@ impl AlphaBetaTransp {
                     depth,
                     value,
                     tp: EntryType::Lower
-                });
+                }, stats.transposition());
             } else if value >= b {
                 self.transposition_table.insert(board_hash, Entry {
                     depth,
                     value,
                     tp: EntryType::Upper
-                });
+                }, stats.transposition());
             } else{
                 self.transposition_table.insert(board_hash, Entry {
                     depth,
                     value,
                     tp: EntryType::Exact
-                });
+                }, stats.transposition());
             }
 
             return value;
@@ -111,7 +104,7 @@ impl AlphaBetaTransp {
         if board.current_player() == White {
             value = std::i32::MIN;
             for move_res in order_moves(board.all_moves(),&board) {
-                value = value.max(self.mini_max_ab(move_res.board, depth - 1, a, b));
+                value = value.max(self.mini_max_ab(move_res.board, depth - 1, a, b, stats));
                 a = a.max(value);
                 if a >= b {
                     break;
@@ -121,7 +114,7 @@ impl AlphaBetaTransp {
         } else {
             value = std::i32::MAX;
             for move_res in order_moves(board.all_moves(),&board) {
-                value = value.min(self.mini_max_ab(move_res.board, depth - 1, a, b));
+                value = value.min(self.mini_max_ab(move_res.board, depth - 1, a, b, stats));
                 b = b.min(value);
                 if b <= a {
                     break;
@@ -134,19 +127,19 @@ impl AlphaBetaTransp {
                 depth,
                 value,
                 tp: EntryType::Lower
-            });
+            }, stats.transposition());
         } else if value >= b {
             self.transposition_table.insert(board_hash, Entry {
                 depth,
                 value,
                 tp: EntryType::Upper
-            });
+            }, stats.transposition());
         } else{
             self.transposition_table.insert(board_hash, Entry {
                 depth,
                 value,
                 tp: EntryType::Exact
-            });
+            }, stats.transposition());
         }
 
         return value
@@ -154,11 +147,9 @@ impl AlphaBetaTransp {
 }
 
 impl Solver for AlphaBetaTransp {
-    fn make_move_impl<B: Board>(&mut self, board: B, _stats: &mut StatsEntry) -> Option<B> {
+    fn make_move_impl<B: Board>(&mut self, board: DisplayableBoard<B>, stats: &mut StatsEntry) -> Option<DisplayableBoard<B>> {
         let mut rng = thread_rng();
 
-        self.table_hits = 0;
-        self.explored = 0;
 
         let mut best_moves = Vec::new();
 
@@ -166,7 +157,7 @@ impl Solver for AlphaBetaTransp {
         if board.current_player() == White {
             best = i32::MIN;
             for move_res in order_moves(board.all_moves(),&board) {
-                let score = self.mini_max_ab(move_res.board, self.search_depth, std::i32::MIN, std::i32::MAX);
+                let score = self.mini_max_ab(move_res.board, self.search_depth, std::i32::MIN, std::i32::MAX, stats);
                 if score > best {
                     best = score;
                     best_moves = Vec::new();
@@ -180,7 +171,7 @@ impl Solver for AlphaBetaTransp {
         if board.current_player() == Black {
             best = i32::MAX;
             for move_res in order_moves(board.all_moves(),&board) {
-                let score = self.mini_max_ab(move_res.board, self.search_depth, i32::MIN, i32::MAX);
+                let score = self.mini_max_ab(move_res.board, self.search_depth, i32::MIN, i32::MAX, stats);
                 if score < best {
                     best = score;
                     best_moves = Vec::new();
@@ -191,19 +182,23 @@ impl Solver for AlphaBetaTransp {
             }
         }
 
+        stats.evaluation(best as i64);
+
         let board_hash = board.hash();
         self.transposition_table.insert(board_hash, Entry {
             depth: self.search_depth,
             value: best,
             tp: EntryType::Exact
-        });
+        }, stats.transposition());
 
-
-        self.last_best = best;
 
         let m = best_moves.into_iter().choose(&mut rng)?;
 
         Some(board.transition(m))
+    }
+
+    fn init_stats(&self, stats_folder: String) -> Stats {
+        Stats::new("Minimax with Alpha-Beta pruning using a transposition table", Some(self.search_depth), Some(self.transposition_table.len()), stats_folder, true)
     }
 
     // fn stats(&self) -> String {

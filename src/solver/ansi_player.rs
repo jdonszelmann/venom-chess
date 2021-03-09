@@ -1,5 +1,5 @@
 use crate::solver::Solver;
-use crate::stats::StatsEntry;
+use crate::stats::{StatsEntry, Stats};
 use crate::game_engine::board::Board;
 use std::io::Write;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode, Clear};
@@ -27,7 +27,7 @@ impl AnsiPlayer {
 impl Solver for AnsiPlayer {
     const PRINT_OWN_BOARD: bool = true;
 
-    fn make_move_impl<B: Board>(&mut self, board: B, stats: &mut StatsEntry) -> Option<B> {
+    fn make_move_impl<B: Board>(&mut self, board: DisplayableBoard<B>, stats: &mut StatsEntry) -> Option<DisplayableBoard<B>> {
         let mv = match make_move_input(board.clone(), stats) {
             Ok(i) => i,
             Err(_) => {
@@ -39,10 +39,14 @@ impl Solver for AnsiPlayer {
 
         Some(board.transition(mv))
     }
+
+    fn init_stats(&self, stats_folder: String) -> Stats {
+        Stats::new("Human player (Ansi input)", None, None, stats_folder, false)
+    }
 }
 
-fn make_move_input<B: Board>(board: B, _stats: &mut StatsEntry) -> crossterm::Result<Move> {
-    let mut b = DisplayableBoard::new(board);
+fn make_move_input<B: Board>(board: DisplayableBoard<B>, _stats: &mut StatsEntry) -> crossterm::Result<Move> {
+    let mut b = board;
 
     'outer: loop {
         let mut stdout = std::io::stdout();
@@ -122,6 +126,7 @@ fn make_move_input<B: Board>(board: B, _stats: &mut StatsEntry) -> crossterm::Re
             stdout.queue(DisableMouseCapture)?;
             stdout.queue(Clear(All))?;
             stdout.queue(MoveTo(0, 0))?;
+            println!();
 
             return Ok(i);
         } else {
