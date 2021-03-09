@@ -3,10 +3,9 @@ use rand::seq::IteratorRandom;
 use rand::thread_rng;
 use crate::game_engine::color::Color::{White, Black};
 use crate::game_engine::chess_move::Move;
-use std::fs::read;
-use std::i8;
 use crate::solver::Solver;
 use crate::solver::move_order::order_moves;
+use crate::stats::StatsEntry;
 
 pub struct Quiescence {
     search_depth: u64,
@@ -144,7 +143,7 @@ impl Quiescence {
 }
 
 impl Solver for Quiescence {
-    fn make_move<B: Board>(&mut self, board: B) -> Option<B> {
+    fn make_move_impl<B: Board>(&mut self, board: B, _stats: &mut StatsEntry) -> Option<B> {
         self.normal_nodes = 0;
         self.deep_nodes = 0;
 
@@ -189,8 +188,8 @@ impl Solver for Quiescence {
         self.cur_eval = new_state.get_material_score();
         Some(new_state)
     }
-
-    fn stats(&self) -> String {
-        format!("EVAL: {}, {}. EXP: {}, {}.", self.cur_eval, self.deep_eval, self.normal_nodes, self.deep_nodes-self.normal_nodes)
-    }
+    //
+    // fn stats(&self) -> String {
+    //     format!("EVAL: {}, {}. EXP: {}, {}.", self.cur_eval, self.deep_eval, self.normal_nodes, self.deep_nodes-self.normal_nodes)
+    // }
 }

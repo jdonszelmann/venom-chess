@@ -2,11 +2,9 @@ use crate::game_engine::board::Board;
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
 use crate::game_engine::color::Color::{White, Black};
-use crate::game_engine::chess_move::Move;
-use std::fs::read;
-use std::i8;
 use crate::solver::Solver;
 use crate::solver::move_order::order_moves;
+use crate::stats::StatsEntry;
 
 pub struct AlphaBeta {
     search_depth: u64
@@ -60,7 +58,7 @@ impl AlphaBeta {
 }
 
 impl Solver for AlphaBeta {
-    fn make_move<B: Board>(&mut self, board: B) -> Option<B> {
+    fn make_move_impl<B: Board>(&mut self, board: B, _stats: &mut StatsEntry) -> Option<B> {
         let mut rng = thread_rng();
 
         let mut best_moves = Vec::new();
@@ -98,7 +96,4 @@ impl Solver for AlphaBeta {
         Some(board.transition(m))
     }
 
-    fn stats(&self) -> String {
-        "".to_string()
-    }
 }

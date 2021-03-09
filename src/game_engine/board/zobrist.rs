@@ -7,6 +7,7 @@ use rand::rngs::StdRng;
 use rand::{SeedableRng, Rng};
 use lazy_static::lazy_static;
 use std::fmt;
+use arrayvec::ArrayVec;
 
 pub struct ZobristKeys {
     pieces: [[[u64; 12]; 8]; 8],
@@ -45,14 +46,30 @@ impl ZobristKeys {
         }
     }
 
-    pub fn move_piece(&self, mut hash: u64, piece_type: Piece, from: Location, to: Location, replaces: Piece) -> u64 {
+    // pub fn move_piece(&self, mut hash: u64, piece_type: Piece, from: Location, to: Location, replaces: Piece) -> u64 {
+    //     if !piece_type.is_empty() {
+    //         hash = hash ^ self.pieces[from.y as usize][from.x as usize][piece_type.to_number()];
+    //         hash = hash ^ self.pieces[to.y as usize][to.x as usize][piece_type.to_number()];
+    //     }
+    //     if !replaces.is_empty() {
+    //         hash = hash ^ self.pieces[from.y as usize][from.x as usize][replaces.to_number()];
+    //         hash = hash ^ self.pieces[to.y as usize][to.x as usize][replaces.to_number()];
+    //     }
+    //
+    //     hash
+    // }
+
+    pub fn add_piece(&self, mut hash: u64, piece_type: Piece, at: Location) -> u64 {
         if !piece_type.is_empty() {
-            hash = hash ^ self.pieces[from.y as usize][from.x as usize][piece_type.to_number()];
-            hash = hash ^ self.pieces[to.y as usize][to.x as usize][piece_type.to_number()];
+            hash = hash ^ self.pieces[at.y as usize][at.x as usize][piece_type.to_number()];
         }
-        if !replaces.is_empty() {
-            hash = hash ^ self.pieces[from.y as usize][from.x as usize][replaces.to_number()];
-            hash = hash ^ self.pieces[to.y as usize][to.x as usize][replaces.to_number()];
+
+        hash
+    }
+
+    pub fn remove_piece(&self, mut hash: u64, piece_type: Piece, at: Location) -> u64 {
+        if !piece_type.is_empty() {
+            hash = hash ^ self.pieces[at.y as usize][at.x as usize][piece_type.to_number()];
         }
 
         hash
@@ -115,7 +132,7 @@ impl<B: Board> ZobristBoard<B> {
             for j in 0..8 {
                 let location: Location = (i, j).into();
                 let piece = inner.piece_at(location);
-                hash = ZOBRIST_KEYS.move_piece(hash, piece, location, location, Piece::Empty)
+                hash = ZOBRIST_KEYS.add_piece(hash, piece, location)
             }
         }
 
@@ -156,17 +173,26 @@ impl<B> Board for ZobristBoard<B> where B: Board {
     fn transition_with_move_func(&self, m: Move, mut remove_piece: impl FnMut(Piece, Location), mut add_piece: impl FnMut(Piece, Location)) -> Self {
         let mut hash = self.hash;
 
+        // there will never be more than like 4 elements anyway, so 8 is more than enough
+        let mut adds = ArrayVec::<[_; 8]>::new();
+        let mut subs = ArrayVec::<[_; 8]>::new();
+
         let inner = self.inner.transition_with_move_func(m, |p, l| {
-            // TODO:
-            // hash = ZOBRIST_KEYS.move_piece(hash, p, f, t, r);
+            adds.push((p, l));
 
             remove_piece(p, l);
         },|p, l| {
-            // TODO:
-            // hash = ZOBRIST_KEYS.move_piece(hash, p, f, t, r);
+            subs.push((p, l));
 
             add_piece(p, l);
         });
+
+        for (p, l) in adds {
+            hash = ZOBRIST_KEYS.add_piece(hash, p, l);
+        }
+        for (p, l) in subs {
+            hash = ZOBRIST_KEYS.remove_piece(hash, p, l);
+        }
 
         hash = ZOBRIST_KEYS.switch_color(hash);
         hash = ZOBRIST_KEYS.update_en_passant(hash, self.get_en_passant(), inner.get_en_passant());
@@ -225,11 +251,12 @@ impl<B> Board for ZobristBoard<B> where B: Board {
 #[cfg(test)]
 mod tests {
     use crate::game_engine::board::{BasicBoard, Board};
-    use crate::game_engine::board::zobrist::{ZobristBoard, ZobristKeys};
+    use crate::game_engine::board::zobrist::ZobristBoard;
     use super::ZOBRIST_KEYS;
     use crate::solver::random_play::RandomPlay;
     use crate::solver::Solver;
     use crate::game_engine::board::display::DisplayableBoard;
+    use crate::stats::Stats;
 
     #[test]
     fn test_switch_color_twice() {
@@ -274,12 +301,14 @@ mod tests {
     #[test]
     fn test_hash_fuzzer() {
         for _ in 0..10 {
-            let mut board = BasicBoard::DEFAULT_BOARD;
+            let board = BasicBoard::DEFAULT_BOARD;
             let mut zboard = ZobristBoard::new(DisplayableBoard::new(board));
             let mut random_player = RandomPlay::new();
 
+            let s = Stats::new();
+
             for _ in 0..100 {
-                zboard = match random_player.make_move(zboard.clone()) {
+                zboard = match random_player.make_move(zboard.clone(), s.clone()) {
                     Some(i) => i,
                     None => break,
                 }

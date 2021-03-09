@@ -176,7 +176,7 @@ impl<B> Board for PSTBoard<B> where B: Board {
             hv2 -= p.material_worth();
             hv2 += pos_score(p,l);
 
-
+            add_piece(p, l);
         });
 
 
@@ -232,23 +232,24 @@ impl<B> Board for PSTBoard<B> where B: Board {
 
 #[cfg(test)]
 mod tests {
-    use crate::game_engine::board::{BasicBoard, Board};
-    use crate::game_engine::board::zobrist::{ZobristBoard, ZobristKeys};
+    use crate::game_engine::board::BasicBoard;
     use crate::solver::random_play::RandomPlay;
     use crate::game_engine::board::pst::PSTBoard;
     use crate::game_engine::board::display::DisplayableBoard;
     use crate::solver::Solver;
+    use crate::stats::Stats;
 
 
     #[test]
     fn test_heuristic_fuzzer() {
         for _ in 0..1000 {
-            let mut board = BasicBoard::DEFAULT_BOARD;
+            let board = BasicBoard::DEFAULT_BOARD;
             let mut pst_board = PSTBoard::new(DisplayableBoard::new(board));
             let mut random_player = RandomPlay::new();
+            let s = Stats::new();
 
             for _ in 0..50 {
-                pst_board = match random_player.make_move(pst_board.clone()) {
+                pst_board = match random_player.make_move(pst_board.clone(), s.clone()) {
                     Some(i) => i,
                     None => break,
                 }

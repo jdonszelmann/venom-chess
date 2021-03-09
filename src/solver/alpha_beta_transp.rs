@@ -2,15 +2,10 @@ use crate::game_engine::board::Board;
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
 use crate::game_engine::color::Color::{White, Black};
-use crate::game_engine::chess_move::Move;
-use std::fs::read;
-use std::i8;
 use crate::solver::Solver;
-use std::collections::HashMap;
-use std::hash::{Hash, Hasher};
-use std::collections::hash_map::DefaultHasher;
 use crate::transposition_table::TranspositionTable;
 use crate::solver::move_order::order_moves;
+use crate::stats::StatsEntry;
 
 
 pub struct AlphaBetaTransp {
@@ -159,7 +154,7 @@ impl AlphaBetaTransp {
 }
 
 impl Solver for AlphaBetaTransp {
-    fn make_move<B: Board>(&mut self, board: B) -> Option<B> {
+    fn make_move_impl<B: Board>(&mut self, board: B, _stats: &mut StatsEntry) -> Option<B> {
         let mut rng = thread_rng();
 
         self.table_hits = 0;
@@ -211,7 +206,7 @@ impl Solver for AlphaBetaTransp {
         Some(board.transition(m))
     }
 
-    fn stats(&self) -> String {
-        format!("tp hits: {:.3}% explored: {} evaluation: {}, tu: {}, tc: {}", self.table_hits as f64 / self.explored as f64, self.explored, self.last_best, self.transposition_table.used, self.transposition_table.collisions)
-    }
+    // fn stats(&self) -> String {
+    //     format!("tp hits: {:.3}% explored: {} evaluation: {}, tu: {}, tc: {}", self.table_hits as f64 / self.explored as f64 * 100.0, self.explored, self.last_best, self.transposition_table.used, self.transposition_table.collisions)
+    // }
 }

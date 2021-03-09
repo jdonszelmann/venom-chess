@@ -1,37 +1,37 @@
-use crate::game_engine::board::{BasicBoard, Board};
-use crate::ui::unix_repl;
-use crate::game_engine::piece::Piece;
-use crate::game_engine::color::Color;
-use crate::solver::minimax::Minimax;
-use std::thread;
-use std::time::Duration;
-use crate::solver::alpha_beta::AlphaBeta;
-use crate::solver::Solver;
+use crate::game_engine::board::zobrist::ZobristBoard;
 use crate::game_engine::board::pst::PSTBoard;
-use crate::solver::alpha_beta_transp::AlphaBetaTransp;
-use crate::game_engine::board::display::DisplayableBoard;
-use crate::solver::random_play::RandomPlay;
+use crate::game_engine::board::BasicBoard;
+use crate::solver::player::Player;
 use crate::solver::quiescence::Quiescence;
+use crate::runner::Runner;
 
 mod game_engine;
 mod solver;
-mod ui;
+mod runner;
 mod transposition_table;
+mod stats;
 
 
 fn main() {
-    let mut b = PSTBoard::new(BasicBoard::DEFAULT_BOARD);
+    let b = ZobristBoard::new(PSTBoard::new(BasicBoard::DEFAULT_BOARD));
+
+    let p1 = Player::new();
+    let p2 = Quiescence::new(5);
+
+    let mut r = Runner::new(p1, p2);
+    r.run(b);
+
     // let mut b = BasicBoard::new();
     // *b.piece_at_mut((6, 1)) = Piece::WhitePawn;
     // *b.piece_at_mut((0, 7)) = Piece::WhiteKing;
     // *b.piece_at_mut((7, 7)) = Piece::BlackKing;
     // b.current = Color::White;
 
-    let white_solver = AlphaBetaTransp::new(4, 1024 * 1024 * 8);
-    let black_solver = Quiescence::new(4);
+    // let white_solver = AlphaBetaTransp::new(5, 1024 * 1024 * 8);
+    // let black_solver = Quiescence::new(5);
 
     // unix_repl::<_, _, _>(b, Some(black_solver), Some(white_solver));
-    unix_repl::<_, AlphaBetaTransp, _>(b, None, Some(black_solver));
+    // unix_repl::<_, AlphaBetaTransp, _>(b, None, Some(black_solver));
 
     // let rp = AlphaBeta::new();
     // loop {

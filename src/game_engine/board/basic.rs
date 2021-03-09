@@ -4,7 +4,6 @@ use crate::game_engine::piece::{Piece, knight_of_color, bishop_of_color, rook_of
 use crate::game_engine::color::Color::*;
 use crate::game_engine::color::Color;
 use crate::game_engine::piece::Piece::*;
-use std::fmt;
 use crate::game_engine::board::Board;
 use crate::game_engine::king_check::king_check;
 use crate::game_engine::piece_moves::{pawn_moves_black, pawn_moves_white, bishop_moves, knight_moves, rook_moves, king_moves, queen_moves};
@@ -56,7 +55,6 @@ impl BasicBoard {
 }
 
 impl Board for BasicBoard {
-
     fn moves(&self, location: impl Into<Location>) -> Vec<Move> {
         let location = location.into();
         match self.piece_at(location) {

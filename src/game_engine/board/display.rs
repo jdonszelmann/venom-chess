@@ -3,7 +3,7 @@ use crate::game_engine::chess_move::{Move, Location};
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
 use std::fmt;
-use crossterm::style::{SetBackgroundColor, SetForegroundColor, Color::Rgb};
+use crossterm::style::{SetBackgroundColor, Color::Rgb};
 use std::io::stdout;
 use crossterm::QueueableCommand;
 
@@ -107,7 +107,7 @@ impl<B> Board for DisplayableBoard<B> where B: Board {
     }
 
     #[inline]
-    fn transition_with_move_func(&self, m: Move, mut remove_piece: impl FnMut(Piece, Location), mut add_piece: impl FnMut(Piece, Location)) -> Self {
+    fn transition_with_move_func(&self, m: Move, remove_piece: impl FnMut(Piece, Location), add_piece: impl FnMut(Piece, Location)) -> Self {
         let res = self.inner.transition_with_move_func(m, remove_piece, add_piece);
 
         Self {
