@@ -17,49 +17,54 @@ pub struct BasicBoard {
     pub current: Color,
     pub castling_rights: [bool; 4],
     pub en_passant: i8,
+
     pub material_score: i32,
-    pub clock: [u128; 2],
+
+    pub clock: [Duration; 2],
     pub move_count: i32,
     pub last_move_time: SystemTime,
 }
 
 
 impl BasicBoard {
-    pub const DEFAULT_BOARD: BasicBoard = BasicBoard {
-        board: [
-            [BlackRook, BlackKnight, BlackBishop, BlackQueen, BlackKing, BlackBishop, BlackKnight, BlackRook],
-            [BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn],
-            [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
-            [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
-            [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
-            [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
-            [WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn],
-            [WhiteRook, WhiteKnight, WhiteBishop, WhiteQueen, WhiteKing, WhiteBishop, WhiteKnight, WhiteRook],
-        ],
 
-        current: White,
+    pub fn default_board(initial_time_limit: Duration) -> Self {
+        Self {
+            board: [
+                [BlackRook, BlackKnight, BlackBishop, BlackQueen, BlackKing, BlackBishop, BlackKnight, BlackRook],
+                [BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn, BlackPawn],
+                [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
+                [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
+                [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
+                [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty],
+                [WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn, WhitePawn],
+                [WhiteRook, WhiteKnight, WhiteBishop, WhiteQueen, WhiteKing, WhiteBishop, WhiteKnight, WhiteRook],
+            ],
 
-        castling_rights: [true; 4],
+            current: White,
 
-        en_passant: 8,
+            castling_rights: [true; 4],
 
-        material_score: 0,
+            en_passant: 8,
 
-        clock: [std::u128::MAX; 2],
+            material_score: 0,
 
-        move_count: 0,
+            clock: [initial_time_limit; 2],
 
-        last_move_time: SystemTime::UNIX_EPOCH,
-    };
+            move_count: 0,
 
-    pub fn new(time_limit: u128) -> Self {
+            last_move_time: SystemTime::UNIX_EPOCH,
+        }
+    }
+
+    pub fn new(initial_time_limit: Duration) -> Self {
         Self {
             board: [[Empty; 8]; 8],
             current: White,
             castling_rights: [true; 4],
             en_passant: 8,
             material_score: 0,
-            clock: [time_limit; 2],
+            clock: [initial_time_limit; 2],
             move_count: 0,
             last_move_time: SystemTime::UNIX_EPOCH,
         }
@@ -107,9 +112,10 @@ impl Board for BasicBoard {
 
         if self.move_count > 0 {
             if self.current_player() == Color::White {
-                new_board.clock[0] -= SystemTime::now().duration_since(self.last_move_time).unwrap().as_millis();
+
+                new_board.clock[0] = new_board.clock[0].checked_sub(SystemTime::now().duration_since(self.last_move_time).unwrap()).unwrap_or(Duration::from_millis(0));
             } else {
-                new_board.clock[1] -= SystemTime::now().duration_since(self.last_move_time).unwrap().as_millis();
+                new_board.clock[1] = new_board.clock[1].checked_sub(SystemTime::now().duration_since(self.last_move_time).unwrap()).unwrap_or(Duration::from_millis(0));
             }
         }
         new_board.last_move_time = SystemTime::now();
@@ -270,6 +276,12 @@ impl Board for BasicBoard {
     }
 
     fn is_terminal(&self) -> Option<Color> {
+        if self.get_clock()[0] == Duration::from_millis(0) {
+            return Some(Black)
+        } else if self.get_clock()[1] == Duration::from_millis(0) {
+            return Some(White)
+        }
+
         if self.all_moves().len() == 0 {
             if king_check(self, self.current) {
                 return Some(self.current.other());
@@ -307,7 +319,7 @@ impl Board for BasicBoard {
         self.material_score
     }
 
-    fn get_clock(&self) -> [u128; 2] {
+    fn get_clock(&self) -> [Duration; 2] {
         self.clock
     }
 
@@ -320,8 +332,12 @@ impl Board for BasicBoard {
         s.finish()
     }
 
-    fn set_clock(&mut self, time: u128) {
-        self.clock = [time*1000;2];
+    fn set_clock(&mut self, time: Duration) {
+        self.clock = [time;2];
+    }
+
+    fn heuristic(&self) -> f64 {
+        self.get_material_score() as f64
     }
 }
 

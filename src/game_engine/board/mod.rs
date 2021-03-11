@@ -3,6 +3,7 @@ pub use basic::BasicBoard;
 use crate::game_engine::chess_move::{Location, Move};
 use crate::game_engine::color::Color;
 use crate::game_engine::piece::Piece;
+use std::time::Duration;
 
 pub mod basic;
 pub mod zobrist;
@@ -32,11 +33,13 @@ pub trait Board: Sized + Clone {
 
     fn get_castling_rights(&self) -> [bool; 4];
     fn get_en_passant(&self) -> i8;
-    fn get_material_score(&self) -> i32;
     fn piece_at(&self, l: impl Into<Location>) -> Piece;
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece;
-    fn get_clock(&self) -> [u128; 2];
-    fn set_clock(&mut self, time : u128);
+    fn get_clock(&self) -> [Duration; 2];
+    fn set_clock(&mut self, time : Duration);
+
+    fn get_material_score(&self) -> i32;
+    fn heuristic(&self) -> f64;
 
     // TODO: use built in hash trait
     fn hash(&self) -> u64;

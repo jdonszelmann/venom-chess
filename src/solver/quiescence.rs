@@ -19,7 +19,7 @@ impl Quiescence {
         }
     }
 
-    pub fn mini_max_ab(&mut self, board: &impl Board, depth: u64, mut a: i32, mut b: i32, stats: &mut StatsEntry) -> i32 {
+    pub fn mini_max_ab(&mut self, board: &impl Board, depth: u64, mut a: f64, mut b: f64, stats: &mut StatsEntry) -> f64 {
         stats.seen_state();
 
         if depth == 0 {
@@ -32,18 +32,18 @@ impl Quiescence {
             let terminal = board.is_terminal();
             if terminal.is_some() {
                 return if terminal == Some(Black) {
-                    std::i32::MIN
+                    f64::NEG_INFINITY
                 } else if terminal == Some(White) {
-                    std::i32::MAX
+                    f64::INFINITY
                 } else {
-                    0
+                    0.0
                 };
             }
-            return board.get_material_score();
+            return board.heuristic();
         }
 
         if board.current_player() == White {
-            let mut value = std::i32::MIN;
+            let mut value = f64::NEG_INFINITY;
             for move_res in order_moves(board.all_moves(), board){
                 // println!("{}",depth);
                 value = value.max(Self::mini_max_ab(self, &move_res.board, depth - 1, a, b, stats));
@@ -54,7 +54,7 @@ impl Quiescence {
             }
             return value;
         } else {
-            let mut value = std::i32::MAX;
+            let mut value = f64::INFINITY;
             for move_res in order_moves(board.all_moves(), board) {
                 value = value.min(Self::mini_max_ab(self, &move_res.board, depth - 1, a, b, stats));
                 b = b.min(value);
@@ -66,10 +66,10 @@ impl Quiescence {
         }
     }
 
-    pub fn quiescense(&mut self, board: &impl Board, mut a: i32, mut b: i32, stats: &mut StatsEntry) -> i32 {
+    pub fn quiescense(&mut self, board: &impl Board, mut a: f64, mut b: f64, stats: &mut StatsEntry) -> f64 {
         stats.custom_int_entry_add("deep_nodes");
 
-        let cur_score = board.get_material_score();
+        let cur_score = board.heuristic();
 
         if board.current_player() == White {
             if cur_score >= b {
@@ -91,19 +91,19 @@ impl Quiescence {
             let terminal = board.is_terminal();
             if terminal.is_some() {
                 return if terminal == Some(Black) {
-                    std::i32::MIN
+                    f64::NEG_INFINITY
                 } else if terminal == Some(White) {
-                    std::i32::MAX
+                    f64::INFINITY
                 } else {
-                    0
+                    0.0
                 };
             }
-            return board.get_material_score();
+            return board.heuristic();
         }
 
 
         if board.current_player() == White {
-            let mut value = std::i32::MIN;
+            let mut value = f64::NEG_INFINITY;
             let moves: Vec<Move> = board.all_moves().into_iter().filter(|a| a.extra.is_capturing()).collect();
             if moves.len()==0{
                 return cur_score;
@@ -117,7 +117,7 @@ impl Quiescence {
             }
             return a;
         } else {
-            let mut value = std::i32::MAX;
+            let mut value = f64::INFINITY;
             let moves: Vec<Move> = board.all_moves().into_iter().filter(|a| a.extra.is_capturing()).collect();
             if moves.len()==0{
                 return cur_score;
@@ -140,12 +140,12 @@ impl Solver for Quiescence {
 
         let mut best_moves = Vec::new();
 
-        let mut best = 0;
+        let mut best = 0.0;
 
         if board.current_player() == White {
-            best = std::i32::MIN;
+            best = f64::NEG_INFINITY;
             for move_res in order_moves(board.all_moves(), &board) {
-                let score = Self::mini_max_ab(self, &move_res.board, self.search_depth, std::i32::MIN, std::i32::MAX, stats);
+                let score = Self::mini_max_ab(self, &move_res.board, self.search_depth, f64::NEG_INFINITY, f64::INFINITY, stats);
                 if score > best {
                     best = score;
                     best_moves = Vec::new();
@@ -157,9 +157,9 @@ impl Solver for Quiescence {
         }
 
         if board.current_player() == Black {
-            best = std::i32::MAX;
+            best = f64::INFINITY;
             for move_res in order_moves(board.all_moves(), &board) {
-                let score = Self::mini_max_ab(self, &move_res.board, self.search_depth, i32::MIN, i32::MAX, stats);
+                let score = Self::mini_max_ab(self, &move_res.board, self.search_depth, f64::NEG_INFINITY, f64::INFINITY, stats);
                 if score < best {
                     best = score;
                     best_moves = Vec::new();
@@ -173,7 +173,7 @@ impl Solver for Quiescence {
         let m = best_moves.into_iter().choose(&mut rng)?;
 
         let new_state = board.transition(m);
-        stats.evaluation(best as i64);
+        stats.evaluation(best);
         stats.custom_int_entry("current_evaluation", new_state.get_material_score() as i64);
 
         Some(new_state)

@@ -5,6 +5,7 @@ use crate::solver::quiescence::Quiescence;
 use crate::runner::Runner;
 use crate::solver::alpha_beta_transp::AlphaBetaTransp;
 use crate::solver::iterative_deepening::IterativeDeepening;
+use std::time::Duration;
 
 mod game_engine;
 mod solver;
@@ -14,8 +15,7 @@ mod stats;
 
 
 fn main() {
-    let mut b = ZobristBoard::new(PSTBoard::new(BasicBoard::DEFAULT_BOARD));
-    b.set_clock(1*60);
+    let mut b = ZobristBoard::new(PSTBoard::new(BasicBoard::default_board(Duration::from_secs(5 * 60))));
 
     // let p1 = AlphaBetaTransp::new(4, 16 * 1024 * 1024);
     // let p2 = Quiescence::new(4);

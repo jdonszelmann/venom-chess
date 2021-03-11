@@ -33,6 +33,8 @@ impl<S1: Solver, S2: Solver> Runner<S1, S2> {
                 println!("{}", db);
                 println!("{:?}", db.get_clock());
 
+                println!("{:?} won", i);
+
                 return i;
             }
 

@@ -44,7 +44,7 @@ pub struct StatsEntry {
     time_finished: Option<SystemTime>,
 
     num_states_seen: u64,
-    evaluation: i64,
+    evaluation: f64,
 
     // None if variable/not applicable
     search_depth: Option<u64>,
@@ -66,7 +66,7 @@ impl StatsEntry {
             time_finished: None,
 
             num_states_seen: 0,
-            evaluation: 0,
+            evaluation: 0.0,
 
             search_depth,
             transposition: None,
@@ -97,7 +97,7 @@ impl StatsEntry {
         self.float_entries.insert(name, value);
     }
 
-    pub fn evaluation(&mut self, value: i64) {
+    pub fn evaluation(&mut self, value: f64) {
         self.evaluation = value;
     }
 

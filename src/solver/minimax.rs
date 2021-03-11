@@ -17,32 +17,32 @@ impl Minimax {
         }
     }
 
-    pub fn mini_max(board: &impl Board, depth: u64, stats: &mut StatsEntry) -> i32 {
+    pub fn mini_max(board: &impl Board, depth: u64, stats: &mut StatsEntry) -> f64 {
         stats.seen_state();
 
         if depth == 0 || board.is_terminal().is_some() {
             let terminal = board.is_terminal();
             if terminal.is_some() {
                 return if terminal == Some(Black) {
-                    std::i32::MIN
+                    f64::NEG_INFINITY
                 } else if terminal == Some(White) {
-                    std::i32::MAX
+                    f64::INFINITY
                 } else {
-                    0
+                    0.0
                 };
             }
-            return board.get_material_score();
+            return board.heuristic();
         }
 
         if board.current_player() == White {
-            let mut value = -std::i32::MAX;
+            let mut value = f64::NEG_INFINITY;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
                 value = value.max(Self::mini_max(&new_board, depth - 1, stats));
             }
             return value;
         } else {
-            let mut value = std::i32::MAX;
+            let mut value = f64::INFINITY;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
                 value = value.min(Self::mini_max(&new_board, depth - 1, stats));
@@ -59,7 +59,7 @@ impl Solver for Minimax {
         let mut best_moves = Vec::new();
 
         if board.current_player() == White {
-            let mut best = -std::i32::MAX;
+            let mut best = f64::NEG_INFINITY;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
                 let score = Self::mini_max(&new_board, self.search_depth, stats);
@@ -72,11 +72,11 @@ impl Solver for Minimax {
                 }
             }
 
-            stats.evaluation(best as i64);
+            stats.evaluation(best);
         }
 
         if board.current_player() == Black {
-            let mut best = std::i32::MAX;
+            let mut best = f64::INFINITY;
             for m in board.all_moves() {
                 let new_board = board.transition(m);
                 let score = Self::mini_max(&new_board, self.search_depth, stats);
@@ -89,7 +89,7 @@ impl Solver for Minimax {
                 }
             }
 
-            stats.evaluation(best as i64);
+            stats.evaluation(best);
         }
 
         let m = best_moves.into_iter().choose(&mut rng)?;

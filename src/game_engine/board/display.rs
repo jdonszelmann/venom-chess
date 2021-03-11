@@ -6,6 +6,7 @@ use std::fmt;
 use crossterm::style::{SetBackgroundColor, Color::Rgb};
 use std::io::stdout;
 use crossterm::QueueableCommand;
+use std::time::Duration;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub struct DisplayableBoard<B> {
@@ -158,15 +159,19 @@ impl<B> Board for DisplayableBoard<B> where B: Board {
         self.inner.piece_at_mut(l)
     }
 
-    fn get_clock(&self) -> [u128; 2] {
+    fn get_clock(&self) -> [Duration; 2] {
         self.inner.get_clock()
     }
 
-    fn set_clock(&mut self, time: u128) {
+    fn set_clock(&mut self, time: Duration) {
         self.inner.set_clock(time);
     }
 
     fn hash(&self) -> u64 {
         self.inner.hash()
+    }
+
+    fn heuristic(&self) -> f64 {
+        self.inner.heuristic()
     }
 }
