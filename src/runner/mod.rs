@@ -34,6 +34,7 @@ impl<S1: Solver, S2: Solver> Runner<S1, S2> {
             if db.current_player() == Color::Black {
                 if !S1::PRINT_OWN_BOARD {
                     println!("{}", db);
+                    println!("{:?}", db.get_clock());
                     // println!("black stats: {:?}", self.black_stats.last_entry());
                     // println!("white stats: {:?}", self.white_stats.last_entry());
                 }
@@ -48,6 +49,7 @@ impl<S1: Solver, S2: Solver> Runner<S1, S2> {
             } else {
                 if !S2::PRINT_OWN_BOARD {
                     println!("{}", db);
+                    println!("{:?}", db.get_clock());
                     // println!("black stats: {:?}", self.black_stats.last_entry());
                     // println!("white stats: {:?}", self.white_stats.last_entry());
                 }

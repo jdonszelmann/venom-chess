@@ -1,6 +1,6 @@
 use crate::game_engine::board::zobrist::ZobristBoard;
 use crate::game_engine::board::pst::PSTBoard;
-use crate::game_engine::board::BasicBoard;
+use crate::game_engine::board::{BasicBoard, Board};
 use crate::solver::quiescence::Quiescence;
 use crate::runner::Runner;
 use crate::solver::alpha_beta_transp::AlphaBetaTransp;
@@ -13,7 +13,8 @@ mod stats;
 
 
 fn main() {
-    let b = ZobristBoard::new(PSTBoard::new(BasicBoard::DEFAULT_BOARD));
+    let mut b = ZobristBoard::new(PSTBoard::new(BasicBoard::DEFAULT_BOARD));
+    b.set_clock(5*60);
 
     let p1 = AlphaBetaTransp::new(4, 16 * 1024 * 1024);
     let p2 = Quiescence::new(4);

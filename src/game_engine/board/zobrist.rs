@@ -243,6 +243,14 @@ impl<B> Board for ZobristBoard<B> where B: Board {
         self.inner.piece_at_mut(l)
     }
 
+    fn get_clock(&self) -> [u128; 2] {
+        self.inner.get_clock()
+    }
+
+    fn set_clock(&mut self, time: u128) {
+        self.inner.set_clock(time);
+    }
+
     fn hash(&self) -> u64 {
         self.hash
     }

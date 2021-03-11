@@ -35,6 +35,8 @@ pub trait Board: Sized + Clone {
     fn get_material_score(&self) -> i32;
     fn piece_at(&self, l: impl Into<Location>) -> Piece;
     fn piece_at_mut(&mut self, l: impl Into<Location>) -> &mut Piece;
+    fn get_clock(&self) -> [u128; 2];
+    fn set_clock(&mut self, time : u128);
 
     // TODO: use built in hash trait
     fn hash(&self) -> u64;
