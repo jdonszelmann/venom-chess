@@ -4,6 +4,7 @@ use crate::game_engine::board::{BasicBoard, Board};
 use crate::solver::quiescence::Quiescence;
 use crate::runner::Runner;
 use crate::solver::alpha_beta_transp::AlphaBetaTransp;
+use crate::solver::iterative_deepening::IterativeDeepening;
 
 mod game_engine;
 mod solver;
@@ -14,10 +15,13 @@ mod stats;
 
 fn main() {
     let mut b = ZobristBoard::new(PSTBoard::new(BasicBoard::DEFAULT_BOARD));
-    b.set_clock(5*60);
+    b.set_clock(1*60);
 
-    let p1 = AlphaBetaTransp::new(4, 16 * 1024 * 1024);
-    let p2 = Quiescence::new(4);
+    // let p1 = AlphaBetaTransp::new(4, 16 * 1024 * 1024);
+    // let p2 = Quiescence::new(4);
+
+    let p1 = IterativeDeepening::new();
+    let p2 = IterativeDeepening::new();
 
     let mut r = Runner::new(p1, p2, "stats".to_string());
     r.run(b);

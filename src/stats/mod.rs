@@ -46,6 +46,9 @@ pub struct StatsEntry {
     num_states_seen: u64,
     evaluation: i64,
 
+    // None if variable/not applicable
+    search_depth: Option<u64>,
+
     #[serde(flatten)]
     transposition: Option<TranspositionTableStats>,
 
@@ -57,7 +60,7 @@ pub struct StatsEntry {
 
 
 impl StatsEntry {
-    pub fn new() -> Self {
+    pub fn new(search_depth: Option<u64>) -> Self {
         Self {
             time_created: SystemTime::now(),
             time_finished: None,
@@ -65,11 +68,16 @@ impl StatsEntry {
             num_states_seen: 0,
             evaluation: 0,
 
+            search_depth,
             transposition: None,
 
             int_entries: Default::default(),
             float_entries: Default::default()
         }
+    }
+
+    pub fn search_depth(&mut self, value: u64) {
+        self.search_depth = Some(value);
     }
 
     pub fn custom_int_entry(&mut self, name: &'static str, value: i64) {
@@ -115,11 +123,12 @@ impl StatsEntry {
 pub struct Metadata {
     algorithm_name: &'static str,
 
-    // None if variable/not applicable
-    search_depth: Option<u64>,
-
     // Size of the transposition table (in number of entries)
     transposition_table_size: Option<u64>,
+
+    // None if variable/not applicable
+    #[serde(skip)]
+    search_depth: Option<u64>,
 }
 
 #[derive(Clone)]
@@ -139,8 +148,8 @@ impl Stats {
 
         let metadata = Metadata {
             algorithm_name,
-            search_depth,
             transposition_table_size,
+            search_depth,
         };
 
         let (tx, rx) = channel();
@@ -184,7 +193,7 @@ impl Stats {
     }
 
     pub fn new_entry(&self) -> StatsEntry {
-        StatsEntry::new()
+        StatsEntry::new(self.metadata.search_depth)
     }
 
     pub fn finish_entry(&self, mut entry: StatsEntry) {
