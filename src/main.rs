@@ -4,6 +4,7 @@ use crate::game_engine::board::BasicBoard;
 use crate::solver::quiescence::Quiescence;
 use crate::runner::Runner;
 use crate::solver::alpha_beta_transp::AlphaBetaTransp;
+use crate::solver::player::Player;
 
 mod game_engine;
 mod solver;
@@ -16,7 +17,8 @@ fn main() {
     let b = ZobristBoard::new(PSTBoard::new(BasicBoard::DEFAULT_BOARD));
 
     let p1 = AlphaBetaTransp::new(4, 16 * 1024 * 1024);
-    let p2 = Quiescence::new(4);
+    // let p2 = Quiescence::new(4);
+    let p2 = Player::new();
 
     let mut r = Runner::new(p1, p2, "stats".to_string());
     r.run(b);
