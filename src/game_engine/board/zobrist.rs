@@ -8,6 +8,7 @@ use rand::{SeedableRng, Rng};
 use lazy_static::lazy_static;
 use std::fmt;
 use arrayvec::ArrayVec;
+use std::time::Duration;
 
 pub struct ZobristKeys {
     pieces: [[[u64; 12]; 8]; 8],
@@ -243,8 +244,20 @@ impl<B> Board for ZobristBoard<B> where B: Board {
         self.inner.piece_at_mut(l)
     }
 
+    fn get_clock(&self) -> [Duration; 2] {
+        self.inner.get_clock()
+    }
+
+    fn set_clock(&mut self, time: Duration) {
+        self.inner.set_clock(time);
+    }
+
     fn hash(&self) -> u64 {
         self.hash
+    }
+
+    fn heuristic(&self) -> f64 {
+        self.inner.heuristic()
     }
 }
 

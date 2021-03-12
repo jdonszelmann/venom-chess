@@ -3,6 +3,7 @@ use crate::game_engine::chess_move::{Move, Location};
 use crate::game_engine::piece::Piece;
 use crate::game_engine::color::Color;
 use std::fmt;
+use std::time::Duration;
 
 const TABLE_PAWN: [[i32; 8]; 8] = [
     [0, 0, 0, 0, 0, 0, 0, 0, ],
@@ -212,7 +213,7 @@ impl<B> Board for PSTBoard<B> where B: Board {
     }
 
     fn get_material_score(&self) -> i32 {
-        self.heuristic_value
+        self.inner.get_material_score()
     }
 
     #[inline]
@@ -225,8 +226,20 @@ impl<B> Board for PSTBoard<B> where B: Board {
         self.inner.piece_at_mut(l)
     }
 
+    fn get_clock(&self) -> [Duration; 2] {
+        self.inner.get_clock()
+    }
+
+    fn set_clock(&mut self, time: Duration) {
+        self.inner.set_clock(time);
+    }
+
     fn hash(&self) -> u64 {
         self.inner.hash()
+    }
+
+    fn heuristic(&self) -> f64 {
+        self.heuristic_value as f64
     }
 }
 

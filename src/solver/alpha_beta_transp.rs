@@ -22,7 +22,7 @@ enum EntryType {
 
 struct Entry {
     depth: u64,
-    value: i32,
+    value: f64,
     tp: EntryType,
 }
 
@@ -34,7 +34,7 @@ impl AlphaBetaTransp {
         }
     }
 
-    pub fn mini_max_ab<B: Board>(&mut self, board: B, depth: u64, mut a: i32, mut b: i32, stats: &mut StatsEntry) -> i32 {
+    pub fn mini_max_ab<B: Board>(&mut self, board: B, depth: u64, mut a: f64, mut b: f64, stats: &mut StatsEntry) -> f64 {
         stats.seen_state();
 
         let board_hash = board.hash();
@@ -66,14 +66,14 @@ impl AlphaBetaTransp {
 
             let value = if terminal.is_some() {
                 if terminal == Some(Black) {
-                    std::i32::MIN
+                    f64::NEG_INFINITY
                 } else if terminal == Some(White) {
-                    std::i32::MAX
+                    f64::INFINITY
                 } else {
-                    0
+                    0.0
                 }
             } else {
-                board.get_material_score()
+                board.heuristic()
             };
 
             if value <= a {
@@ -102,7 +102,7 @@ impl AlphaBetaTransp {
 
         let mut value;
         if board.current_player() == White {
-            value = std::i32::MIN;
+            value = f64::NEG_INFINITY;
             for move_res in order_moves(board.all_moves(),&board) {
                 value = value.max(self.mini_max_ab(move_res.board, depth - 1, a, b, stats));
                 a = a.max(value);
@@ -112,7 +112,7 @@ impl AlphaBetaTransp {
             }
 
         } else {
-            value = std::i32::MAX;
+            value = f64::INFINITY;
             for move_res in order_moves(board.all_moves(),&board) {
                 value = value.min(self.mini_max_ab(move_res.board, depth - 1, a, b, stats));
                 b = b.min(value);
@@ -153,11 +153,11 @@ impl Solver for AlphaBetaTransp {
 
         let mut best_moves = Vec::new();
 
-        let mut best = 0;
+        let mut best = 0.0;
         if board.current_player() == White {
-            best = i32::MIN;
+            best = f64::NEG_INFINITY;
             for move_res in order_moves(board.all_moves(),&board) {
-                let score = self.mini_max_ab(move_res.board, self.search_depth, std::i32::MIN, std::i32::MAX, stats);
+                let score = self.mini_max_ab(move_res.board, self.search_depth, f64::NEG_INFINITY, f64::INFINITY, stats);
                 if score > best {
                     best = score;
                     best_moves = Vec::new();
@@ -169,9 +169,9 @@ impl Solver for AlphaBetaTransp {
         }
 
         if board.current_player() == Black {
-            best = i32::MAX;
+            best = f64::INFINITY;
             for move_res in order_moves(board.all_moves(),&board) {
-                let score = self.mini_max_ab(move_res.board, self.search_depth, i32::MIN, i32::MAX, stats);
+                let score = self.mini_max_ab(move_res.board, self.search_depth, f64::NEG_INFINITY, f64::INFINITY, stats);
                 if score < best {
                     best = score;
                     best_moves = Vec::new();
@@ -182,7 +182,7 @@ impl Solver for AlphaBetaTransp {
             }
         }
 
-        stats.evaluation(best as i64);
+        stats.evaluation(best);
 
         let board_hash = board.hash();
         self.transposition_table.insert(board_hash, Entry {

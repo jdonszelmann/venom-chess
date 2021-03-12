@@ -11,6 +11,8 @@ pub mod quiescence;
 pub mod ansi_player;
 pub mod fallback_player;
 pub mod player;
+pub mod iterative_deepening;
+pub mod id_quiescence;
 
 pub trait Solver {
     /// If a solver sets this to true, it is responsible

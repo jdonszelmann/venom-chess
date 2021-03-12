@@ -26,36 +26,52 @@ impl<S1: Solver, S2: Solver> Runner<S1, S2> {
 
     pub fn run<B: Board>(&mut self, board: B) -> Color {
         let mut db = DisplayableBoard::new(board);
+        let mut no_move_counter = 0;
+
         loop {
             if let Some(i) = db.is_terminal() {
+                println!("{}", db);
+                println!("{:?}", db.get_clock());
+
+                println!("{:?} won", i);
+
                 return i;
+            }
+
+            if no_move_counter > 0 {
+                unreachable!();
             }
 
             if db.current_player() == Color::Black {
                 if !S1::PRINT_OWN_BOARD {
                     println!("{}", db);
+                    println!("{:?}", db.get_clock());
                     // println!("black stats: {:?}", self.black_stats.last_entry());
                     // println!("white stats: {:?}", self.white_stats.last_entry());
                 }
 
-                db = match self.black_solver.make_move(db, self.black_stats.clone()) {
+                db = match self.black_solver.make_move(db.clone(), self.black_stats.clone()) {
                     Some(i) => i,
                     None => {
                         println!("black couldn't make a move");
-                        return White;
+                        no_move_counter += 1;
+                        continue;
                     }
                 };
             } else {
                 if !S2::PRINT_OWN_BOARD {
                     println!("{}", db);
+                    println!("{:?}", db.get_clock());
                     // println!("black stats: {:?}", self.black_stats.last_entry());
                     // println!("white stats: {:?}", self.white_stats.last_entry());
                 }
-                db = match self.white_solver.make_move(db, self.white_stats.clone()) {
+                db = match self.white_solver.make_move(db.clone(), self.white_stats.clone()) {
                     Some(i) => i,
                     None => {
                         println!("white couldn't make a move");
-                        return White;
+                        no_move_counter += 1;
+
+                        continue;
                     }
                 };
             }
